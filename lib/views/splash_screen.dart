@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:raiseit/views/home_screen.dart';
+import 'package:raiseit/views/login_screen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -41,7 +42,7 @@ class SplashScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
