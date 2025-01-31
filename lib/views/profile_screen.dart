@@ -184,7 +184,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
 
                   /// ** Info section (Followers, Donations & Organisations)**
                   Row(
@@ -214,11 +215,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
 
-                      /// **Vertical Divider**
-                      const VerticalDivider(
-                        color: Colors.grey,
-                        thickness: 1,
-                        width: 20,  // Add some width to make sure the divider is visible
+                      // Vertical Divider
+                      Container(
+                        height: 40, // Adjust the height of the divider
+                        width: 1, // Width of the line
+                        color: Colors.grey, // Color of the divider
                       ),
 
                       /// **Donations Column**
@@ -246,11 +247,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
 
-                      /// **Vertical Divider**
-                      const VerticalDivider(
-                        color: Colors.grey,
-                        thickness: 4,
-                        width: 20,  // Add some width here too
+                      // Vertical Divider
+                      Container(
+                        height: 40, // Adjust the height of the divider
+                        width: 1, // Width of the line
+                        color: Colors.grey, // Color of the divider
                       ),
 
                       /// **Organisations Column**
@@ -280,7 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 22),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
                   ///** Organisations display section
                   Column(
@@ -315,48 +316,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribute items evenly
+                          mainAxisAlignment: MainAxisAlignment.start, // Start the items from the left
                           children: List.generate(10, (index) {
-                            return InkWell(
-                              onTap: () {
-                                // Show notification as a SnackBar
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("You clicked on Organisation ${index + 1}"),
-                                    duration: const Duration(seconds: 1), // Duration for the SnackBar
-                                    backgroundColor: Colors.blue, // Custom background color
-                                  ),
-                                );
-                              },
-                              child: Column(
-                                children: [
-                                  CircleAvatar(
-                                    radius: screenWidth * 0.1, // Adjust size dynamically
-                                    backgroundImage: const AssetImage('assets/images/3d-cartoon-character-b.png'),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    "Organisation ${index + 1}",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.normal,
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0), // Adds space between the items
+                              child: InkWell(
+                                onTap: () {
+                                  // Show notification as a SnackBar
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("You clicked on Organisation ${index + 1}"),
+                                      duration: const Duration(seconds: 1), // Duration for the SnackBar
+                                      backgroundColor: Colors.blue, // Custom background color
                                     ),
-                                  ),
-                                ],
+                                  );
+                                },
+                                child: Column(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: screenWidth * 0.15, // Adjust size dynamically
+                                      backgroundImage: const AssetImage('assets/images/3d-cartoon-character-b.png'),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      "Organisation ${index + 1}",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           }),
                         ),
                       )
-
-
-
-
                     ],
                   )
-
-
                 ],
               ),
             ),
