@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:raiseit/views/payment_screen.dart';
 import '../components/bottom_navigation.dart';
 
 class MyDonationsScreen extends StatefulWidget {
@@ -21,9 +22,17 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text(
+        child: TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PaymentScreen()),
+            );
+          }, child: Text(
           "My donations screen",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+
         ),
       ),
     );

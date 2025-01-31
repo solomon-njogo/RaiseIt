@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _pageController, // Controller to manage the page
         onPageChanged: _onTabChanged,
         children: [
-          // Home Screen Tab - Display the message here
+          // Home Screen Tab 
           Center(
             child: Text(
               "This is the Home Screen",
