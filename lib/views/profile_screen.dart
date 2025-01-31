@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:raiseit/views/settings_screen.dart';
 import '../components/bottom_navigation.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -58,6 +59,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 IconButton(
                   onPressed: () {
                     // Settings or more options functionality
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                    );
                   },
                   icon: const Icon(Icons.more_horiz_outlined, size: 28, color: Colors.white),
                 ),
