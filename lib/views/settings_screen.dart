@@ -51,6 +51,15 @@ class SettingsScreen extends StatelessWidget {
                   },
                 ),
 
+                // Edit Profile
+                ListTile(
+                  title: const Text("Edit Profile"),
+                  onTap: () {
+                    // No action here, logic not implemented
+                  },
+                  trailing: const Icon(Icons.edit_outlined),
+                ),
+
                 // About Section
                 ListTile(
                   title: const Text("About"),
