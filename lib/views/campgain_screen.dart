@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../components/bottom_navigation.dart';
 
 class CampgainScreen extends StatefulWidget {
   const CampgainScreen({super.key});
