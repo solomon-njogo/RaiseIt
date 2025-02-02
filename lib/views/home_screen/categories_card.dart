@@ -12,11 +12,18 @@ class CategoriesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen width and height
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0), // Proper padding
+        padding: EdgeInsets.symmetric(
+          vertical: screenHeight * 0.01, // Adjust vertical padding dynamically
+          horizontal: screenWidth * 0.03, // Adjust horizontal padding dynamically
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -24,16 +31,19 @@ class CategoriesCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(
                 imagePath,
-                width: 50, // Adjusted size for better visibility
-                height: 40,
+                width: screenWidth * 0.12, // Adjust width based on screen size
+                height: screenHeight * 0.04, // Adjust height based on screen size
                 fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: screenHeight * 0.002), // Adjust space dynamically
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              textAlign: TextAlign.center, // Ensure proper alignment
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: screenWidth * 0.04, // Adjust font size based on screen width
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

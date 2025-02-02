@@ -34,26 +34,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return SafeArea(
       child: Scaffold(
         body: PageView(
           controller: _pageController,
           onPageChanged: _onTabChanged,
           children: [
-            SingleChildScrollView( // Makes the page scrollable vertically
+            SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(screenWidth * 0.04),
                 child: Column(
                   children: [
                     const HomeHeader(),
-                    const SizedBox(height: 20),
-                    _buildYourContributionsSection(),
-                    const SizedBox(height: 20),
-                    _buildCategoriesSection(),
-                    const SizedBox(height: 20),
-                    _buildUrgentSection(),
-                    const SizedBox(height: 20),
-                    _buildTrendingSection(),
+                    SizedBox(height: screenHeight * 0.02),
+                    _buildYourContributionsSection(screenWidth, screenHeight),
+                    SizedBox(height: screenHeight * 0.02),
+                    _buildCategoriesSection(screenHeight),
+                    SizedBox(height: screenHeight * 0.02),
+                    _buildUrgentSection(screenHeight, screenWidth),
+                    SizedBox(height: screenHeight * 0.02),
+                    _buildTrendingSection(screenHeight),
                   ],
                 ),
               ),
@@ -71,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildUrgentSection() {
+  Widget _buildUrgentSection(double screenHeight, double screenWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -79,13 +82,13 @@ class _HomeScreenState extends State<HomeScreen> {
           "Urgent",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: screenHeight * 0.01),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.35,
+          height: screenHeight * 0.35,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 4,
-            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            separatorBuilder: (context, index) => SizedBox(width: screenWidth * 0.02),
             itemBuilder: (context, index) {
               return const UrgentCard(
                 imagePath: 'assets/images/3d-cartoon-character-b.png',
@@ -93,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 progress: 0.5,
                 currentAmount: 12000,
                 totalAmount: 24000,
-                category: "Medical", // Example category
+                category: "Medical",
               );
             },
           ),
@@ -102,30 +105,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildYourContributionsSection() {
+  Widget _buildYourContributionsSection(double screenWidth, double screenHeight) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
-      child: Container(
-        height: 150, // Increased height to 150
+      child: SizedBox(
+        height: screenHeight * 0.18,
         child: Row(
           children: [
-            // Left Section - Dark Blue Background (Icon + Donation Details Side by Side)
             Expanded(
-              flex: 2, // 2/3 of the width
+              flex: 3,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.009, vertical: screenHeight * 0.015),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF002147), // Dark Blue
+                  color: Color(0xFF002147),
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12)
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(2.0),
                   child: Row(
                     children: [
                       const Icon(Icons.account_balance_wallet, color: Colors.white, size: 30),
@@ -145,35 +147,35 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
+                      const Spacer(),
                     ],
                   ),
                 ),
               ),
             ),
-
-            // Right Section - White Background (View Transactions takes 1/3 of the width)
             Expanded(
-              flex: 1, // 1/3 of the width
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
+              flex: 1,
+              child: GestureDetector(
+                onTap: () {
+                  // Handle click event here, e.g., navigate to another screen
+                  print("Right side clicked");
+                  // You can navigate to another screen like:
+                  // Navigator.push(context, MaterialPageRoute(builder: (context) => YourNextScreen()));
+                },
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.04),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "View Transactions",
-                        style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                      Icon(Icons.arrow_forward_ios, color: Colors.black, size: 18),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Icon(Icons.arrow_forward_ios, color: Colors.black, size: 38),
+                    ),
                   ),
                 ),
               ),
@@ -185,10 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-
-
-
-  Widget _buildCategoriesSection() {
+  Widget _buildCategoriesSection(double screenHeight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -196,17 +195,17 @@ class _HomeScreenState extends State<HomeScreen> {
           "Categories",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: screenHeight * 0.01),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.1,
+          height: screenHeight * 0.1,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: 4,
-            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            itemCount: 10,
+            separatorBuilder: (context, index) => SizedBox(width: screenHeight * 0.01),
             itemBuilder: (context, index) {
               return const CategoriesCard(
                 imagePath: 'assets/images/3d-cartoon-character-b.png',
-                title: "Medical Aid",
+                title: "Medical",
               );
             },
           ),
@@ -215,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTrendingSection() {
+  Widget _buildTrendingSection(double screenHeight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,13 +225,13 @@ class _HomeScreenState extends State<HomeScreen> {
             Text("More", style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey, fontSize: 18)),
           ],
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: screenHeight * 0.01),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.35,
+          height: screenHeight * 0.35,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
-            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            separatorBuilder: (context, index) => SizedBox(width: screenHeight * 0.02),
             itemBuilder: (context, index) {
               return const TrendingCard(
                 imagePath: 'assets/images/rendering-anime-doctors-work.png',
