@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:raiseit/views/settings_screen.dart';
-import '../components/bottom_navigation.dart';
+import 'package:raiseit/views/settings_screens/settings_screen.dart';
+import '../../components/bottom_navigation.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

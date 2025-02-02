@@ -6,7 +6,7 @@ import 'package:raiseit/views/home_screen/categories_card.dart';
 import 'package:raiseit/views/home_screen/home_header.dart';
 import 'package:raiseit/views/home_screen/trending_card.dart';
 import 'package:raiseit/views/home_screen/urgent_card.dart';
-import 'package:raiseit/views/profile_screen.dart';
+import 'package:raiseit/views/profile_screens/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
