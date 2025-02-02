@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:raiseit/components/bottom_navigation.dart';
-import 'package:raiseit/views/campgain_screen.dart';
+import 'package:raiseit/views/campgain/campgain_screen.dart';
+import 'package:raiseit/views/donations/my_donations_screen.dart';
 import 'package:raiseit/views/home_screen/categories_card.dart';
 import 'package:raiseit/views/home_screen/home_header.dart';
 import 'package:raiseit/views/home_screen/trending_card.dart';
 import 'package:raiseit/views/home_screen/urgent_card.dart';
-import 'package:raiseit/views/my_donations_screen.dart';
 import 'package:raiseit/views/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -61,8 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            const MyDonationsScreen(),
             const CampgainScreen(),
+            const MyDonationsScreen(),
             const ProfileScreen(),
           ],
         ),

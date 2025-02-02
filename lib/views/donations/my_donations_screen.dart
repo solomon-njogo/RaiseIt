@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:raiseit/views/payment_screen.dart';
-import '../components/bottom_navigation.dart';
 
 class MyDonationsScreen extends StatefulWidget {
   const MyDonationsScreen({super.key});

@@ -68,12 +68,12 @@ class _BottomNavigationState extends State<BottomNavigation> {
                 label: "Home",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: "Donations",
-              ),
-              BottomNavigationBarItem(
                 icon: Icon(Icons.campaign),
                 label: "Campaigns",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.favorite),
+                label: "Donations",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person),
