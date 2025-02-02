@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:raiseit/components/bottom_navigation.dart';
 import 'package:raiseit/views/campgain/campgain_screen.dart';
+import 'package:raiseit/views/charities/charity_details_screen.dart';
 import 'package:raiseit/views/donations/my_donations_screen.dart';
 import 'package:raiseit/views/home_screen/categories_card.dart';
 import 'package:raiseit/views/home_screen/home_header.dart';
@@ -74,38 +75,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildUrgentSection(double screenHeight, double screenWidth) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Urgent",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        SizedBox(height: screenHeight * 0.01),
-        SizedBox(
-          height: screenHeight * 0.35,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: 4,
-            separatorBuilder: (context, index) => SizedBox(width: screenWidth * 0.02),
-            itemBuilder: (context, index) {
-              return const UrgentCard(
-                imagePath: 'assets/images/3d-cartoon-character-b.png',
-                title: "Medical Aid",
-                progress: 0.5,
-                currentAmount: 12000,
-                totalAmount: 24000,
-                category: "Medical",
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildYourContributionsSection(double screenWidth, double screenHeight) {
+  Widget _buildYourContributionsSection(
+      double screenWidth, double screenHeight) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
@@ -116,21 +87,23 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               flex: 3,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.009, vertical: screenHeight * 0.015),
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.009,
+                    vertical: screenHeight * 0.015),
                 decoration: const BoxDecoration(
                   color: Color(0xFF002147),
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                       bottomLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(12)
-                  ),
+                      bottomRight: Radius.circular(12)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: Row(
                     children: [
-                      const Icon(Icons.account_balance_wallet, color: Colors.white, size: 30),
+                      const Icon(Icons.account_balance_wallet,
+                          color: Colors.white, size: 30),
                       const Spacer(),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,12 +111,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: const [
                           Text(
                             "Your Donation Pocket",
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 16),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 16),
                           ),
                           SizedBox(height: 4),
                           Text(
                             "\$ 240,200",
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 40),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 40),
                           ),
                         ],
                       ),
@@ -174,7 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Center(
-                      child: Icon(Icons.arrow_forward_ios, color: Colors.black, size: 38),
+                      child: Icon(Icons.arrow_forward_ios,
+                          color: Colors.black, size: 38),
                     ),
                   ),
                 ),
@@ -185,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 
   Widget _buildCategoriesSection(double screenHeight) {
     return Column(
@@ -201,11 +180,63 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 10,
-            separatorBuilder: (context, index) => SizedBox(width: screenHeight * 0.01),
+            separatorBuilder: (context, index) =>
+                SizedBox(width: screenHeight * 0.01),
             itemBuilder: (context, index) {
               return const CategoriesCard(
                 imagePath: 'assets/images/3d-cartoon-character-b.png',
                 title: "Medical",
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUrgentSection(double screenHeight, double screenWidth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Urgent",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        SizedBox(height: screenHeight * 0.01),
+        SizedBox(
+          height: screenHeight * 0.35,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: 4,
+            separatorBuilder: (context, index) =>
+                SizedBox(width: screenWidth * 0.02),
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CharityDetailsScreen(
+                        title: "Medical Aid",
+                        imagePath: 'assets/images/3d-cartoon-character-b.png',
+                        progress: 0.5,
+                        currentAmount: 12000,
+                        totalAmount: 24000,
+                        category: "Medical",
+                        description:
+                            "Providing urgent medical aid to those in need.",
+                      ),
+                    ),
+                  );
+                },
+                child: const UrgentCard(
+                  imagePath: 'assets/images/3d-cartoon-character-b.png',
+                  title: "Medical Aid",
+                  progress: 0.5,
+                  currentAmount: 12000,
+                  totalAmount: 24000,
+                  category: "Medical",
+                ),
               );
             },
           ),
@@ -220,9 +251,14 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Row(
           children: [
-            const Text("Trending", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text("Trending",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             const Spacer(),
-            Text("More", style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey, fontSize: 18)),
+            const Text("More",
+                style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey,
+                    fontSize: 18)),
           ],
         ),
         SizedBox(height: screenHeight * 0.01),
@@ -231,14 +267,35 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
-            separatorBuilder: (context, index) => SizedBox(width: screenHeight * 0.02),
+            separatorBuilder: (context, index) =>
+                SizedBox(width: screenHeight * 0.02),
             itemBuilder: (context, index) {
-              return const TrendingCard(
-                imagePath: 'assets/images/rendering-anime-doctors-work.png',
-                title: "Helping Kenyan Medical Workers",
-                progress: 0.5,
-                currentAmount: 12000,
-                totalAmount: 24000,
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CharityDetailsScreen(
+                        title: "Helping Kenyan Medical Workers",
+                        imagePath:
+                            'assets/images/rendering-anime-doctors-work.png',
+                        progress: 0.5,
+                        currentAmount: 12000,
+                        totalAmount: 24000,
+                        category: "Health",
+                        description:
+                            "Supporting frontline medical workers in Kenya.",
+                      ),
+                    ),
+                  );
+                },
+                child: const TrendingCard(
+                  imagePath: 'assets/images/rendering-anime-doctors-work.png',
+                  title: "Helping Kenyan Medical Workers",
+                  progress: 0.5,
+                  currentAmount: 12000,
+                  totalAmount: 24000,
+                ),
               );
             },
           ),

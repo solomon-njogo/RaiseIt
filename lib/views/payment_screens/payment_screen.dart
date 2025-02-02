@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:raiseit/views/payment_details_screen.dart';
+import 'package:raiseit/views/payment_screens/payment_details_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});

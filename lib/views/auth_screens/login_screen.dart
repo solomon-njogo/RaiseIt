@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:raiseit/views/signup_screen.dart';
+import 'package:raiseit/views/auth_screens/signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:raiseit/views/charities/charity_details_screen.dart'; // Import the CharityDetailsScreen
 
 class TrendingCard extends StatelessWidget {
   final String imagePath;
@@ -23,7 +24,23 @@ class TrendingCard extends StatelessWidget {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: GestureDetector(
-        onTap: () => print("Card tapped!"),
+        onTap: () {
+          // Navigate to CharityDetailsScreen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CharityDetailsScreen(
+                title: title,
+                imagePath: imagePath,
+                progress: progress,
+                currentAmount: currentAmount,
+                totalAmount: totalAmount,
+                category: 'Trending', // Add category or use your own logic
+                description: 'More details about this trending charity.',
+              ),
+            ),
+          );
+        },
         child: Container(
           width: MediaQuery.of(context).size.width * 0.85,
           padding: const EdgeInsets.all(16),

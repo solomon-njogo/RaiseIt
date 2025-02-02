@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:raiseit/views/charities/charity_details_screen.dart'; // Import the CharityDetailsScreen
 
 class UrgentCard extends StatelessWidget {
   final String imagePath;
@@ -6,7 +7,7 @@ class UrgentCard extends StatelessWidget {
   final double progress;
   final int currentAmount;
   final int totalAmount;
-  final String category; // New category field
+  final String category;
 
   const UrgentCard({
     super.key,
@@ -15,13 +16,29 @@ class UrgentCard extends StatelessWidget {
     required this.progress,
     required this.currentAmount,
     required this.totalAmount,
-    required this.category, // New required category
+    required this.category,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => print("Card tapped!"),
+      onTap: () {
+        // Navigate to CharityDetailsScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CharityDetailsScreen(
+              title: title,
+              imagePath: imagePath,
+              progress: progress,
+              currentAmount: currentAmount,
+              totalAmount: totalAmount,
+              category: category,
+              description: 'More details about this urgent charity.',
+            ),
+          ),
+        );
+      },
       child: Card(
         shadowColor: Colors.grey,
         elevation: 5,
@@ -53,7 +70,7 @@ class UrgentCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        category, // Display category here
+                        category,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
