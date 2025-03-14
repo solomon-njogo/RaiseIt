@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:raiseit/views/home_screen/home_screen.dart';
 import 'login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -184,7 +185,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         email: email,
                         password: password,
                       );
+                        FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+                        // Add a new document with an auto-generated ID
+                        await firestore.collection('users').add({
+                          'name': fullName,
+                          'email': email,
+                        });
                       // Navigate to home screen after successful sign-up
                       // Replace `HomeScreen()` with your actual home screen widget
                       Navigator.pushReplacement(
