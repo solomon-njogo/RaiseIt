@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "590103625739",
+    "firebase_url": "https://raiseit-9fefc-default-rtdb.firebaseio.com",
+    "project_id": "raiseit-9fefc",
+    "storage_bucket": "raiseit-9fefc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590103625739:android:bbdaa6ef762e1f6920c70e",
+        "android_client_info": {
+          "package_name": "com.example.raiseit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWtBtTMSIsnYyJn9J_miGjMsgL5w-nrqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:raiseit/views/home_screen/home_screen.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -12,6 +13,22 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+
+  // Controllers for text fields
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is removed
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               // Full Name Field
               TextField(
+                controller: _fullNameController,
                 decoration: InputDecoration(
                   labelText: "Full Name",
                   hintText: "Enter your full name",
@@ -63,6 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               // Email Field
               TextField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   labelText: "Email",
                   hintText: "Enter your email",
@@ -78,6 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               // Password Field with Toggle
               TextField(
+                controller: _passwordController,
                 obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
                   labelText: "Password",
@@ -103,6 +123,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               // Confirm Password Field with Toggle
               TextField(
+                controller: _confirmPasswordController,
                 obscureText: !_isConfirmPasswordVisible,
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
@@ -130,8 +151,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement sign-up functionality
+                  onPressed: () async {
+                    // Get input values
+                    String fullName = _fullNameController.text.trim();
+                    String email = _emailController.text.trim();
+                    String password = _passwordController.text.trim();
+                    String confirmPassword = _confirmPasswordController.text.trim();
+
+                    // Validate input
+                    if (fullName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please fill in all fields."),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Check if passwords match
+                    if (password != confirmPassword) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Passwords do not match."),
+                        ),
+                      );
+                      return;
+                    }
+
+                    try {
+                      // Create user with Firebase
+                      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+
+                      // Navigate to home screen after successful sign-up
+                      // Replace `HomeScreen()` with your actual home screen widget
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      // Handle errors
+                      String errorMessage = "Sign-up failed. Please try again.";
+                      if (e.code == 'weak-password') {
+                        errorMessage = "The password provided is too weak.";
+                      } else if (e.code == 'email-already-in-use') {
+                        errorMessage = "The account already exists for that email.";
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errorMessage),
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("An error occurred: $e"),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),

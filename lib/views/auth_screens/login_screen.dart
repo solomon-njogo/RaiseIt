@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:raiseit/views/auth_screens/signup_screen.dart';
+import 'package:raiseit/views/home_screen/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,6 +12,16 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false; // Controls password visibility
+  final TextEditingController _emailController = TextEditingController(); // Controller for email
+  final TextEditingController _passwordController = TextEditingController(); // Controller for password
+
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is removed
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Email Field
               TextField(
+                controller: _emailController, // Assign controller
                 decoration: InputDecoration(
                   labelText: "Email",
                   hintText: "Enter your email",
@@ -62,6 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Password Field with Toggle
               TextField(
+                controller: _passwordController, // Assign controller
                 obscureText: !_isPasswordVisible, // Toggle visibility
                 decoration: InputDecoration(
                   labelText: "Password",
@@ -102,8 +116,49 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement login functionality
+                  onPressed: () async {
+                    // Get email and password from controllers
+                    String email = _emailController.text.trim();
+                    String password = _passwordController.text.trim();
+
+                    // Validate input
+                    if (email.isEmpty || password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please fill in all fields."),
+                        ),
+                      );
+                      return;
+                    }
+
+                    try {
+                      // Sign in with Firebase
+                      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+
+                      // Navigate to home screen after successful login
+                      // Replace `HomeScreen()` with your actual home screen widget
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      // Handle errors
+                      String errorMessage = "Login failed. Please try again.";
+                      if (e.code == 'user-not-found') {
+                        errorMessage = "No user found for this email.";
+                      } else if (e.code == 'wrong-password') {
+                        errorMessage = "Wrong password provided.";
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errorMessage),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
