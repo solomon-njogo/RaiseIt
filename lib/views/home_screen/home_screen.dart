@@ -6,8 +6,6 @@ import 'package:raiseit/views/campgain/campgain_screen.dart';
 import 'package:raiseit/views/donations/my_donations_screen.dart';
 import 'package:raiseit/views/home_screen/categories_card.dart';
 import 'package:raiseit/views/home_screen/home_header.dart';
-import 'package:raiseit/views/home_screen/trending_card.dart';
-import 'package:raiseit/views/home_screen/urgent_card.dart';
 import 'package:raiseit/views/profile_screens/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,6 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   late PageController _pageController;
 
+  String _selectedFilter = 'All';
+  bool _isAscending = true;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +33,93 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
     _pageController.jumpToPage(index);
+  }
+
+  Stream<List<Charity>> _fetchFilteredCharities() {
+    Query query = FirebaseFirestore.instance.collection('charities');
+
+    if (_selectedFilter == "Trending") {
+      query = query.where('status', isEqualTo: 'Trending');
+    } else if (_selectedFilter == "Urgency") {
+      query = query.where('status', isEqualTo: 'Urgent');
+    } else if (_selectedFilter == "Target Amount") {
+      query = query.orderBy('targetAmount', descending: !_isAscending);
+    } else if (_selectedFilter == "Amount Raised") {
+      query = query.orderBy('raisedAmount', descending: !_isAscending);
+    }
+
+    return query.snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Charity.fromFirestore(doc)).toList());
+  }
+
+  void _showFilterMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Filter Options",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Column(
+                children: [
+                  _buildFilterOption("All"),
+                  _buildFilterOption("Trending"),
+                  _buildFilterOption("Urgency"),
+                  _buildFilterOption("Target Amount"),
+                  _buildFilterOption("Amount Raised"),
+                ],
+              ),
+              const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Sort Order", style: TextStyle(fontSize: 16)),
+              ToggleButtons(
+                borderRadius: BorderRadius.circular(8),
+                isSelected: [_isAscending, !_isAscending],
+                onPressed: (index) {
+                  setState(() {
+                    _isAscending = index == 0;
+                  });
+                  Navigator.pop(context);
+                },
+                children: const [
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text("↑ Asc")),
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text("↓ Desc")),
+                ],
+              ),
+            ],
+          ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterOption(String filterName) {
+    return ListTile(
+      title: Text(filterName),
+      trailing: _selectedFilter == filterName
+          ? const Icon(Icons.check, color: Colors.blue)
+          : null,
+      onTap: () {
+        setState(() {
+          _selectedFilter = filterName;
+        });
+        Navigator.pop(context);
+      },
+    );
   }
 
   @override
@@ -63,9 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(height: screenHeight * 0.02),
                       _buildCategoriesSection(isDesktop),
                       SizedBox(height: screenHeight * 0.02),
-                      _buildUrgentSection(),
-                      SizedBox(height: screenHeight * 0.02),
-                      _buildTrendingSection(),
+                      _buildFilterAndCharities(),
                     ],
                   ),
                 ),
@@ -82,15 +168,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Stream<List<Charity>> _fetchCharitiesByStatus(String status) {
-    return FirebaseFirestore.instance
-        .collection('charities')
-        .where('status', isEqualTo: status)
-        .snapshots()
-        .map((snapshot) =>
-        snapshot.docs.map((doc) => Charity.fromFirestore(doc)).toList());
   }
 
   Widget _buildCategoriesSection(bool isDesktop) {
@@ -117,73 +194,67 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildUrgentSection() {
+  Widget _buildFilterAndCharities() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Urgent", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.4,
-          child: StreamBuilder<List<Charity>>(
-            stream: _fetchCharitiesByStatus("Urgent"),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text("No urgent campaigns found."));
-              }
-
-              return ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: snapshot.data!.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (_, index) {
-                  Charity charity = snapshot.data![index];
-                  return UrgentCard(
-                    imagePath: charity.imageUrl,
-                    title: charity.name,
-                    progress: charity.raisedAmount / charity.targetAmount,
-                    currentAmount: charity.raisedAmount.toInt(),  // ✅ Convert to int
-                    totalAmount: charity.targetAmount.toInt(),    // ✅ Convert to int
-
-                    category: charity.category,
-                  );
-                },
-              );
-            },
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("All Charities", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            IconButton(
+              icon: const Icon(Icons.filter_list, size: 28),
+              onPressed: () => _showFilterMenu(context),
+            ),
+          ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildTrendingSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("Trending", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
+
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.4,
+          height: MediaQuery.of(context).size.height * 0.6,
           child: StreamBuilder<List<Charity>>(
-            stream: _fetchCharitiesByStatus("Trending"),
+            stream: _fetchFilteredCharities(),
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text("No trending campaigns found."));
+                return const Center(child: Text("No charities found."));
               }
 
               return ListView.separated(
-                scrollDirection: Axis.horizontal,
                 itemCount: snapshot.data!.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (_, index) {
                   Charity charity = snapshot.data![index];
-                  return TrendingCard(
-                    imagePath: charity.imageUrl,
-                    title: charity.name,
-                    progress: charity.raisedAmount / charity.targetAmount,
-                    currentAmount: charity.raisedAmount.toInt(),  // ✅ Convert to int
-                    totalAmount: charity.targetAmount.toInt(),    // ✅ Convert to int
-
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              charity.imageUrl,
+                              height: 180,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            charity.name,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          LinearProgressIndicator(
+                            value: charity.raisedAmount / charity.targetAmount,
+                            backgroundColor: Colors.grey[300],
+                            color: Colors.blue,
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
               );
