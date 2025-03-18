@@ -19,7 +19,7 @@ class AuthWrapper extends StatelessWidget {
           if (user == null) {
             return const LoginScreen(); // Go to Login Page if not logged in
           } else {
-            return const ProfileScreen(); // Go to Home Page if logged in
+            return const HomeScreen(); // Go to Home Page if logged in
           }
         }
 
