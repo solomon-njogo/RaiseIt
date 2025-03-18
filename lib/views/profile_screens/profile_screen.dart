@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:raiseit/viewmodels/profile_viewmodel.dart';
+import 'package:raiseit/views/add_charity/add_charity_screen.dart';
 import 'package:raiseit/views/settings_screens/settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -76,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           IconButton(
                             onPressed: () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                              MaterialPageRoute(builder: (context) => AddCharityScreen()),
                             ),
                             icon: const Icon(Icons.settings, size: 28, color: Colors.white),
                           ),

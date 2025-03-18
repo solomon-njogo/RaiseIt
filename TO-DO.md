@@ -1,7 +1,3 @@
-Here’s a **detailed and extensive `TODO.md`** for RaiseIt, outlining tasks and the development roadmap with checkboxes:
-
----
-
 # ✅ RaiseIt TODO List
 
 This document outlines the **roadmap, tasks, and milestones** for the RaiseIt project.

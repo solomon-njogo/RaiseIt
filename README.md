@@ -71,7 +71,7 @@ Here’s the fixed and properly formatted **Contributors** section:
 #### 1️⃣ **Solomon Njogo**
 📧 Email: [solonjogo@gmail.com](mailto:solonjogo@gmail.com)  
 🌍 GitHub: [github.com/solomon-njogo](https://github.com/solomon-njogo)  
-🐦 Twitter: [@solonjogo](https://twitter.com/solomonjogo)
+🐦 Twitter: [@solomonjogo](https://twitter.com/solomonjogo)
 
 #### 2️⃣ **Maxwell [Last Name]**
 📧 Email: [your-email@example.com](mailto:your-email@example.com)  
