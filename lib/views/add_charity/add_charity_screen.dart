@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:raiseit/models/categories_model.dart';
 
 class AddCharityScreen extends StatefulWidget {
   @override
@@ -21,22 +22,7 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  /// **🔹 List of charity categories**
-  final List<String> _charityCategories = [
-    "Nonprofit",
-    "Community",
-    "Emergency",
-    "Medical",
-    "Memorial",
-    "Environment",
-    "Animal",
-    "Faith",
-    "Volunteer",
-    "Family",
-    "Wishes"
-  ];
 
-  /// **🔹 Pick Image from Gallery**
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -46,17 +32,12 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
     }
   }
 
-  /// **🔹 Select Date Function**
   Future<void> _pickDate(BuildContext context, bool isStartDate) async {
-    DateTime initialDate = DateTime.now();
-    DateTime firstDate = DateTime(2000);
-    DateTime lastDate = DateTime(2100);
-
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: isStartDate ? (_startDate ?? initialDate) : (_endDate ?? initialDate),
-      firstDate: firstDate,
-      lastDate: lastDate,
+      initialDate: isStartDate ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now()),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
     );
 
     if (pickedDate != null) {
@@ -70,13 +51,11 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
     }
   }
 
-  /// **🔹 Format Number with Commas**
   String _formatNumber(String s) {
     if (s.isEmpty) return '';
     return NumberFormat("#,###").format(int.parse(s.replaceAll(',', '')));
   }
 
-  /// **🔹 Handle Input for Target Amount**
   void _onTargetAmountChanged(String value) {
     String newValue = _formatNumber(value);
     if (newValue != value) {
@@ -87,7 +66,6 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
     }
   }
 
-  /// **🔹 Add Charity to Firestore**
   Future<void> _addCharity() async {
     if (_formKey.currentState!.validate() && _startDate != null && _endDate != null) {
       try {
@@ -115,7 +93,6 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
           _startDate = null;
           _endDate = null;
         });
-
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to add charity: $e')),
@@ -126,110 +103,154 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Add Charity')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      appBar: AppBar(
+        title: Text('Add Charity', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter the charity name' : null,
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a description' : null,
-              ),
+              /// Name Input
+              _buildTextField(_nameController, "Charity Name", Icons.business, "Please enter the charity name"),
 
-              /// **🔹 Category Dropdown**
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: InputDecoration(labelText: "Category"),
-                items: _charityCategories.map((category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedCategory = newValue;
-                  });
-                },
-                validator: (value) => value == null ? 'Please select a category' : null,
-              ),
+              /// Description Input
+              _buildTextField(_descriptionController, "Description", Icons.info, "Please enter a description"),
 
-              TextFormField(
-                controller: _locationController,
-                decoration: InputDecoration(labelText: 'Location'),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a location' : null,
-              ),
-              TextFormField(
-                controller: _targetAmountController,
-                decoration: InputDecoration(labelText: 'Target Amount'),
+              /// Category Dropdown
+              _buildDropdown(),
+
+              /// Location Input
+              _buildTextField(_locationController, "Location", Icons.location_on, "Please enter a location"),
+
+              /// Target Amount Input
+              _buildTextField(
+                _targetAmountController, "Target Amount", Icons.attach_money, "Please enter a target amount",
                 keyboardType: TextInputType.number,
                 onChanged: _onTargetAmountChanged,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter a target amount';
-                  if (double.tryParse(value.replaceAll(',', '')) == null) return 'Please enter a valid number';
-                  return null;
-                },
               ),
 
-              /// **🔹 Start Date Picker**
-              ListTile(
-                title: Text("Start Date"),
-                subtitle: Text(_startDate != null
-                    ? "${_startDate!.toLocal()}".split(' ')[0]
-                    : "Select a start date"),
-                trailing: Icon(Icons.calendar_today),
-                onTap: () => _pickDate(context, true),
-              ),
+              /// Start & End Date Pickers
+              _buildDatePicker("Start Date", _startDate, () => _pickDate(context, true)),
+              _buildDatePicker("End Date", _endDate, () => _pickDate(context, false)),
 
-              /// **🔹 End Date Picker**
-              ListTile(
-                title: Text("End Date"),
-                subtitle: Text(_endDate != null
-                    ? "${_endDate!.toLocal()}".split(' ')[0]
-                    : "Select an end date"),
-                trailing: Icon(Icons.calendar_today),
-                onTap: () => _pickDate(context, false),
-              ),
-
-              /// **🔹 Image Picker**
+              /// Image Picker
               SizedBox(height: 20),
-              Text("Upload Charity Image", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              SizedBox(height: 10),
-              _imageFile != null
-                  ? Column(
-                children: [
-                  Image.file(_imageFile!, height: 150, width: 150, fit: BoxFit.cover),
-                  TextButton.icon(
-                    onPressed: _pickImage,
-                    icon: Icon(Icons.image),
-                    label: Text("Change Image"),
+              Center(
+                child: _imageFile != null
+                    ? Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(_imageFile!, height: 180, width: screenWidth * 0.8, fit: BoxFit.cover),
+                    ),
+                    SizedBox(height: 10),
+                    TextButton.icon(
+                      onPressed: _pickImage,
+                      icon: Icon(Icons.image, color: Colors.blue),
+                      label: Text("Change Image", style: TextStyle(color: Colors.blue)),
+                    ),
+                  ],
+                )
+                    : ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: Icon(Icons.upload),
+                  label: Text("Upload Image"),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                ],
-              )
-                  : ElevatedButton.icon(
-                onPressed: _pickImage,
-                icon: Icon(Icons.upload),
-                label: Text("Pick Image"),
+                ),
               ),
 
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _addCharity,
-                child: Text('Add Charity'),
+              /// Submit Button
+              SizedBox(height: 30),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _addCharity,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                    child: Text('Add Charity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 5,
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller,
+      String label,
+      IconData icon,
+      String validationMessage, {
+        TextInputType keyboardType = TextInputType.text,
+        Function(String)? onChanged,
+      }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        onChanged: (value) {
+          if (value.isNotEmpty) {
+            String capitalizedValue = value[0].toUpperCase() + value.substring(1);
+            controller.value = TextEditingValue(
+              text: capitalizedValue,
+              selection: TextSelection.collapsed(offset: capitalizedValue.length),
+            );
+          }
+          if (onChanged != null) {
+            onChanged(value);
+          }
+        },
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        validator: (value) => value == null || value.isEmpty ? validationMessage : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdown() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: DropdownButtonFormField<String>(
+        value: _selectedCategory,
+        decoration: InputDecoration(
+          labelText: "Category",
+          prefixIcon: Icon(Icons.category),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        items: charityCategories.map((category) {
+          return DropdownMenuItem(value: category, child: Text(category));
+        }).toList(),
+        onChanged: (newValue) => setState(() => _selectedCategory = newValue),
+        validator: (value) => value == null ? 'Please select a category' : null,
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(String title, DateTime? date, VoidCallback onTap) {
+    return ListTile(
+      title: Text(title),
+      subtitle: Text(date != null ? DateFormat.yMMMd().format(date) : "Select a date"),
+      trailing: Icon(Icons.calendar_today),
+      onTap: onTap,
     );
   }
 }
