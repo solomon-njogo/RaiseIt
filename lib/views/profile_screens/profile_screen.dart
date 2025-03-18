@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:raiseit/viewmodels/profile_viewmodel.dart';
 import 'package:raiseit/views/settings_screens/settings_screen.dart';
-import '../../components/bottom_navigation.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,383 +11,228 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedIndex = 3;
+  final String profilePicturePath = 'assets/images/3d-cartoon-character-b.png';
 
-  void _onTabChanged(int index) {
-    setState(() {
-      _selectedIndex = index;
+  final List<String> fakeOrganizations = [
+    "Tech Innovators Ltd",
+    "Future Builders Foundation",
+    "Global AI Research",
+    "Green Earth Initiative",
+    "NextGen Coders Hub"
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      var profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
+      profileViewModel.fetchUserData();
+      profileViewModel.listenForUserUpdates();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get screen dimensions dynamically
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
     return SafeArea(
-      child: Stack(
-        clipBehavior: Clip.none, // Ensures items can overflow
-        children: [
-          /// **🔹 Background Layer (Full-Screen Blurred Image)**
-          Container(
-            height: screenHeight * 0.35, // Covers 35% of screen height
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/3d-cartoon-character-b.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Container(
-              color: Colors.black.withOpacity(0.4), // Dark overlay
-            ),
-          ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double screenWidth = constraints.maxWidth;
+          double screenHeight = constraints.maxHeight;
+          bool isWeb = screenWidth > 800;
 
-          /// **🔹 Top Navigation Buttons**
-          Positioned(
-            top: screenHeight * 0.02,
-            left: 16,
-            right: 16,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.arrow_back, size: 28, color: Colors.white),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // Settings or more options functionality
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.more_horiz_outlined, size: 28, color: Colors.white),
-                ),
-              ],
-            ),
-          ),
+          return Consumer<ProfileViewModel>(
+            builder: (context, profileViewModel, child) {
+              final user = profileViewModel.user;
 
-          /// **🔹 Foreground Layer (Profile Details)**
-          Positioned(
-            top: screenHeight * 0.18, // Adjust to make space for the overlapping avatar
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              width: screenWidth,
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.05,
-                vertical: screenHeight * 0.03,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 12,
-                    spreadRadius: 3,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 60), // Space for the avatar overlap
-
-                  /// **🔹 User Name**
-                  const Text(
-                    "John Doe",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
+              /// **🔹 Mobile Layout (With Overlapping Profile Picture)**
+              if (!isWeb) {
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    /// **🔹 Background Image with Overlay**
+                    Container(
+                      height: screenHeight * 0.35,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(profilePicturePath),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Container(color: Colors.black.withOpacity(0.5)),
                     ),
-                  ),
 
-                  const SizedBox(height: 5),
-
-                  /// **🔹 User Email**
-                  const Text(
-                    "johndoe@example.com",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// **🔹 Action Buttons (Message, Follow & Share)**
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      /// **Private Message Button**
-                      ElevatedButton(
-                        onPressed: () {
-                          // Private Message functionality
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.blue,
-                          shape: const CircleBorder(),
-                          minimumSize: Size(screenWidth * 0.18, screenWidth * 0.18), // Ensures a circle
-                          elevation: 3,
-                        ),
-                        child: const Icon(Icons.message_outlined, size: 28, color: Colors.blue),
-                      ),
-
-                      const Spacer(), // Space between buttons
-
-                      /// **Follow Button**
-                      ElevatedButton(
-                        onPressed: () {
-                          // Follow functionality
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.15,
-                            vertical: screenHeight * 0.015,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40),
-                          ),
-                        ),
-                        child: const Text(
-                          "Follow",
-                          style: TextStyle(
-                            fontSize: 21,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                      const Spacer(), // Space between buttons
-
-                      /// **Share Profile Button**
-                      ElevatedButton(
-                        onPressed: () {
-                          // Share Profile functionality
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.blue,
-                          shape: const CircleBorder(),
-                          minimumSize: Size(screenWidth * 0.18, screenWidth * 0.18), // Ensures a circle
-                          elevation: 3,
-                        ),
-                        child: const Icon(Icons.share_outlined, size: 28, color: Colors.blue),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-
-
-                  /// ** Info section (Followers, Donations & Organisations)**
-                  Row(
-                    children: [
-                      /// **Followers Column**
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "870",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Followers",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Vertical Divider
-                      Container(
-                        height: 40, // Adjust the height of the divider
-                        width: 1, // Width of the line
-                        color: Colors.grey, // Color of the divider
-                      ),
-
-                      /// **Donations Column**
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "500",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Donations",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Vertical Divider
-                      Container(
-                        height: 40, // Adjust the height of the divider
-                        width: 1, // Width of the line
-                        color: Colors.grey, // Color of the divider
-                      ),
-
-                      /// **Organisations Column**
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "28",
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Organisations",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-
-                  ///** Organisations display section
-                  Column(
-                    children: [
-                      Row(
+                    /// **🔹 Top Navigation (Back & Settings)**
+                    Positioned(
+                      top: screenHeight * 0.02,
+                      left: 16,
+                      right: 16,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                              "Organisations",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.arrow_back, size: 28, color: Colors.white),
                           ),
-
-                          Spacer(),
-
-                          TextButton(
-                              onPressed: () {},
-                              child: Text("View all",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.lightBlue,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              )
-                          )
+                          IconButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                            ),
+                            icon: const Icon(Icons.settings, size: 28, color: Colors.white),
+                          ),
                         ],
                       ),
+                    ),
 
-                      /// Organisation card placeholder
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start, // Start the items from the left
-                          children: List.generate(10, (index) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0), // Adds space between the items
-                              child: InkWell(
-                                onTap: () {
-                                  // Show notification as a SnackBar
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("You clicked on Organisation ${index + 1}"),
-                                      duration: const Duration(seconds: 1), // Duration for the SnackBar
-                                      backgroundColor: Colors.blue, // Custom background color
+                    /// **🔹 Foreground (User Info)**
+                    Positioned(
+                      top: screenHeight * 0.22, // Push it down for the profile image overlap
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06, vertical: screenHeight * 0.03),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(30),
+                            topRight: Radius.circular(30),
+                          ),
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 80), // Space for overlapping profile image
+                              Text(user?.name ?? "Unknown User", style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                              Text(user?.email ?? "No email provided", style: const TextStyle(fontSize: 18, color: Colors.grey)),
+                              const Divider(thickness: 1.5),
+                              const SizedBox(height: 10),
+
+                              Column(
+                                children: fakeOrganizations.map((org) {
+                                  return Card(
+                                    elevation: 3,
+                                    margin: const EdgeInsets.symmetric(vertical: 5),
+                                    child: ListTile(
+                                      leading: const Icon(Icons.business, color: Colors.blueGrey),
+                                      title: Text(org, style: const TextStyle(fontSize: 18)),
+                                      trailing: const Icon(Icons.chevron_right),
                                     ),
                                   );
-                                },
-                                child: Column(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: screenWidth * 0.15, // Adjust size dynamically
-                                      backgroundImage: const AssetImage('assets/images/3d-cartoon-character-b.png'),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      "Organisation ${index + 1}",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                }).toList(),
                               ),
-                            );
-                          }),
+                            ],
+                          ),
                         ),
-                      )
-                    ],
-                  )
-                ],
-              ),
-            ),
-          ),
+                      ),
+                    ),
 
-          /// **🔹 Overlapping Profile Image**
-          Positioned(
-            top: screenHeight * 0.075, // Adjusted for better overlap
-            left: screenWidth * 0.5 - (screenWidth * 0.2), // Center it
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
+                    /// **🔹 Overlapping Profile Picture**
+                    Positioned(
+                      top: screenHeight * 0.12, // Controls how much it overlaps
+                      left: screenWidth * 0.5 - (screenWidth * 0.15),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 4),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: screenWidth * 0.15,
+                          backgroundImage: AssetImage(profilePicturePath),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              /// **🔹 Web Layout (With Profile Image & Side Info)**
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text("Profile"),
+                  actions: [
+                    IconButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      ),
+                      icon: const Icon(Icons.settings, size: 28),
+                    ),
+                  ],
+                ),
+                body: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08, vertical: screenHeight * 0.05),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// **🔹 Profile Card (With Overlapping Image)**
+                        Column(
+                          children: [
+                            /// **🔹 Overlapping Profile Image**
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 4),
+                                boxShadow: [
+                                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: screenWidth * 0.08,
+                                backgroundImage: AssetImage(profilePicturePath),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Text(user?.name ?? "Unknown User", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                            Text(user?.email ?? "No email provided", style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                          ],
+                        ),
+
+                        const SizedBox(width: 50),
+
+                        /// **🔹 Organizations Section**
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(screenWidth * 0.02),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.white,
+                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Organizations", style: TextStyle(fontSize: screenWidth * 0.03, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 10),
+                                Column(
+                                  children: fakeOrganizations.map((org) {
+                                    return Card(
+                                      elevation: 3,
+                                      margin: const EdgeInsets.symmetric(vertical: 5),
+                                      child: ListTile(
+                                        leading: const Icon(Icons.business, color: Colors.blueGrey),
+                                        title: Text(org, style: const TextStyle(fontSize: 18)),
+                                        trailing: const Icon(Icons.chevron_right),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              child: CircleAvatar(
-                radius: screenWidth * 0.2, // Adjust size dynamically
-                backgroundImage: const AssetImage('assets/images/3d-cartoon-character-b.png'),
-              ),
-            ),
-          ),
-        ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

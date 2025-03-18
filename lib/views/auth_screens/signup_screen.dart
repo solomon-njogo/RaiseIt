@@ -162,9 +162,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     // Validate input
                     if (fullName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Please fill in all fields."),
-                        ),
+                        const SnackBar(content: Text("Please fill in all fields.")),
                       );
                       return;
                     }
@@ -172,34 +170,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     // Check if passwords match
                     if (password != confirmPassword) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Passwords do not match."),
-                        ),
+                        const SnackBar(content: Text("Passwords do not match.")),
                       );
                       return;
                     }
 
                     try {
-                      // Create user with Firebase
-                      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      // Create user with Firebase Authentication
+                      UserCredential credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
-                        FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-                        // Add a new document with an auto-generated ID
-                        await firestore.collection('users').add({
-                          'name': fullName,
-                          'email': email,
-                        });
+                      // Get the user's unique ID (UID)
+                      String uid = credential.user!.uid;
+
+                      FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+                      // Save user data in Firestore using UID as the document ID
+                      await firestore.collection('users').doc(uid).set({
+                        'id': uid,         // Store user ID
+                        'name': fullName,
+                        'email': email,
+                      });
+
                       // Navigate to home screen after successful sign-up
-                      // Replace `HomeScreen()` with your actual home screen widget
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => const HomeScreen()),
                       );
+
                     } on FirebaseAuthException catch (e) {
-                      // Handle errors
+                      // Handle authentication errors
                       String errorMessage = "Sign-up failed. Please try again.";
                       if (e.code == 'weak-password') {
                         errorMessage = "The password provided is too weak.";
@@ -208,15 +210,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(errorMessage),
-                        ),
+                        SnackBar(content: Text(errorMessage)),
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("An error occurred: $e"),
-                        ),
+                        SnackBar(content: Text("An error occurred: $e")),
                       );
                     }
                   },

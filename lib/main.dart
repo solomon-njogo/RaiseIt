@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-//import 'package:raiseit/views/home_screen/home_screen.dart';
-import 'package:raiseit/views/auth_screens/login_screen.dart';
-//import 'package:raiseit/views/auth_screens/signup_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:raiseit/viewmodels/profile_viewmodel.dart';
+import 'package:raiseit/views/auth_screens/authwrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -13,7 +13,16 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform,
     );
     
-  runApp(const MyApp());
+  runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ],
+        child: const MaterialApp(
+          home: MyApp(),
+        ),
+      ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -27,13 +36,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-  //routes: {
-    //'/login': (context) => LoginScreen(),
-   // '/signup': (context) => SignUpScreen(),
-  //},
- // initialRoute: '/login', // or your desired initial route
       ),
-      home: const LoginScreen(),
+      home: const AuthWrapper(), // Use AuthWrapper here,
     );
   }
 }

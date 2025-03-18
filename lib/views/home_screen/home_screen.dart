@@ -35,37 +35,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return SafeArea(
       child: Scaffold(
-        body: PageView(
-          controller: _pageController,
-          onPageChanged: _onTabChanged,
-          children: [
-            SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(screenWidth * 0.04),
-                child: Column(
-                  children: [
-                    const HomeHeader(),
-                    SizedBox(height: screenHeight * 0.02),
-                    _buildYourContributionsSection(screenWidth, screenHeight),
-                    SizedBox(height: screenHeight * 0.02),
-                    _buildCategoriesSection(screenHeight),
-                    SizedBox(height: screenHeight * 0.02),
-                    _buildUrgentSection(screenHeight, screenWidth),
-                    SizedBox(height: screenHeight * 0.02),
-                    _buildTrendingSection(screenHeight),
-                  ],
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            bool isDesktop = constraints.maxWidth > 600;
+            return PageView(
+              controller: _pageController,
+              onPageChanged: _onTabChanged,
+              children: [
+                SingleChildScrollView(
+                  padding: EdgeInsets.all(isDesktop ? 24.0 : 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const HomeHeader(),
+                      SizedBox(height: constraints.maxHeight * 0.02),
+                      _buildYourContributionsSection(constraints.maxWidth),
+                      SizedBox(height: constraints.maxHeight * 0.02),
+                      _buildCategoriesSection(),
+                      SizedBox(height: constraints.maxHeight * 0.02),
+                      _buildUrgentSection(),
+                      SizedBox(height: constraints.maxHeight * 0.02),
+                      _buildTrendingSection(),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            const CampgainScreen(),
-            const MyDonationsScreen(),
-            const ProfileScreen(),
-          ],
+                const CampgainScreen(),
+                const MyDonationsScreen(),
+                const ProfileScreen(),
+              ],
+            );
+          },
         ),
         bottomNavigationBar: BottomNavigation(
           initialIndex: _selectedIndex,
@@ -75,90 +76,55 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildYourContributionsSection(
-      double screenWidth, double screenHeight) {
+  Widget _buildYourContributionsSection(double screenWidth) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
-      child: SizedBox(
-        height: screenHeight * 0.18,
+      child: Container(
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: Row(
           children: [
             Expanded(
-              flex: 3,
               child: Container(
-                padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.009,
-                    vertical: screenHeight * 0.015),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF002147),
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(12)),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF002147),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.account_balance_wallet,
-                          color: Colors.white, size: 30),
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            "Your Donation Pocket",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal,
-                                fontSize: 16),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            "\$ 240,200",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 40),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.account_balance_wallet,
+                        color: Colors.white, size: 30),
+                    const Spacer(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          "Your Donation Pocket",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "\$ 240,200",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                  ],
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: GestureDetector(
-                onTap: () {
-                  // Handle click event here, e.g., navigate to another screen
-                  print("Right side clicked");
-                  // You can navigate to another screen like:
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => YourNextScreen()));
-                },
-                child: Container(
-                  padding: EdgeInsets.all(screenWidth * 0.04),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Icon(Icons.arrow_forward_ios,
-                          color: Colors.black, size: 38),
-                    ),
-                  ),
-                ),
-              ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.arrow_forward_ios, size: 24),
+              onPressed: () {
+                print("Right side clicked");
+              },
             ),
           ],
         ),
@@ -166,23 +132,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoriesSection(double screenHeight) {
+  Widget _buildCategoriesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Categories",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        SizedBox(height: screenHeight * 0.01),
+        const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
         SizedBox(
-          height: screenHeight * 0.1,
+          height: 80,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 10,
-            separatorBuilder: (context, index) =>
-                SizedBox(width: screenHeight * 0.01),
-            itemBuilder: (context, index) {
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, index) {
               return const CategoriesCard(
                 imagePath: 'assets/images/3d-cartoon-character-b.png',
                 title: "Medical",
@@ -194,37 +156,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildUrgentSection(double screenHeight, double screenWidth) {
+  Widget _buildUrgentSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Urgent",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        SizedBox(height: screenHeight * 0.01),
+        const Text("Urgent", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
         SizedBox(
-          height: screenHeight * 0.35,
+          height: 300,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 4,
-            separatorBuilder: (context, index) =>
-                SizedBox(width: screenWidth * 0.02),
-            itemBuilder: (context, index) {
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, index) {
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CharityDetailsScreen(
+                      builder: (_) => const CharityDetailsScreen(
                         title: "Medical Aid",
                         imagePath: 'assets/images/3d-cartoon-character-b.png',
                         progress: 0.5,
                         currentAmount: 12000,
                         totalAmount: 24000,
                         category: "Medical",
-                        description:
-                            "Providing urgent medical aid to those in need.",
+                        description: "Providing urgent medical aid to those in need.",
                       ),
                     ),
                   );
@@ -245,46 +202,43 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTrendingSection(double screenHeight) {
+  Widget _buildTrendingSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text("Trending",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text("Trending", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Spacer(),
-            const Text("More",
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey,
-                    fontSize: 18)),
+            GestureDetector(
+              onTap: () {
+                print("More clicked");
+              },
+              child: const Text("More", style: TextStyle(fontSize: 16, color: Colors.grey)),
+            ),
           ],
         ),
-        SizedBox(height: screenHeight * 0.01),
+        const SizedBox(height: 8),
         SizedBox(
-          height: screenHeight * 0.35,
+          height: 300,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
-            separatorBuilder: (context, index) =>
-                SizedBox(width: screenHeight * 0.02),
-            itemBuilder: (context, index) {
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, index) {
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CharityDetailsScreen(
+                      builder: (_) => const CharityDetailsScreen(
                         title: "Helping Kenyan Medical Workers",
-                        imagePath:
-                            'assets/images/rendering-anime-doctors-work.png',
+                        imagePath: 'assets/images/rendering-anime-doctors-work.png',
                         progress: 0.5,
                         currentAmount: 12000,
                         totalAmount: 24000,
                         category: "Health",
-                        description:
-                            "Supporting frontline medical workers in Kenya.",
+                        description: "Supporting frontline medical workers in Kenya.",
                       ),
                     ),
                   );
