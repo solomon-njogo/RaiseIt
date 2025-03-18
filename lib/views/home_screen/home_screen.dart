@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:raiseit/components/bottom_navigation.dart';
+import 'package:raiseit/models/charity_model.dart';
 import 'package:raiseit/views/campgain/campgain_screen.dart';
-import 'package:raiseit/views/charities/charity_details_screen.dart';
 import 'package:raiseit/views/donations/my_donations_screen.dart';
 import 'package:raiseit/views/home_screen/categories_card.dart';
 import 'package:raiseit/views/home_screen/home_header.dart';
@@ -60,8 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const HomeHeader(),
                       SizedBox(height: screenHeight * 0.02),
-                      _buildYourContributionsSection(screenWidth),
-                      SizedBox(height: screenHeight * 0.02),
                       _buildCategoriesSection(isDesktop),
                       SizedBox(height: screenHeight * 0.02),
                       _buildUrgentSection(),
@@ -85,63 +84,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildYourContributionsSection(double screenWidth) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF002147),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const Icon(Icons.account_balance_wallet, color: Colors.white, size: 30),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Your Donation Pocket",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: screenWidth * 0.04,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          "\$ 240,200",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.06,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward_ios, size: 24),
-              onPressed: () {
-                print("Right side clicked");
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+  Stream<List<Charity>> _fetchCharitiesByStatus(String status) {
+    return FirebaseFirestore.instance
+        .collection('charities')
+        .where('status', isEqualTo: status)
+        .snapshots()
+        .map((snapshot) =>
+        snapshot.docs.map((doc) => Charity.fromFirestore(doc)).toList());
   }
 
   Widget _buildCategoriesSection(bool isDesktop) {
@@ -161,23 +110,9 @@ class _HomeScreenState extends State<HomeScreen> {
             childAspectRatio: 1.5,
           ),
           itemCount: 10,
-          itemBuilder: (_, index) => const CategoriesCard(
-            imagePath: 'assets/images/3d-cartoon-character-b.png',
-            title: "Medical",
-          ),
+          itemBuilder: (_, index) => const CategoriesCard(),
         )
-            : SizedBox(
-          height: MediaQuery.of(context).size.height * 0.25,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: 10,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, index) => const CategoriesCard(
-              imagePath: 'assets/images/3d-cartoon-character-b.png',
-              title: "Medical",
-            ),
-          ),
-        ),
+            : const CategoriesCard(),
       ],
     );
   }
@@ -190,36 +125,29 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 8),
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.4,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: 4,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CharityDetailsScreen(
-                        title: "Medical Aid",
-                        imagePath: 'assets/images/3d-cartoon-character-b.png',
-                        progress: 0.5,
-                        currentAmount: 12000,
-                        totalAmount: 24000,
-                        category: "Medical",
-                        description: "Providing urgent medical aid to those in need.",
-                      ),
-                    ),
+          child: StreamBuilder<List<Charity>>(
+            stream: _fetchCharitiesByStatus("Urgent"),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text("No urgent campaigns found."));
+              }
+
+              return ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: snapshot.data!.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, index) {
+                  Charity charity = snapshot.data![index];
+                  return UrgentCard(
+                    imagePath: charity.imageUrl,
+                    title: charity.name,
+                    progress: charity.raisedAmount / charity.targetAmount,
+                    currentAmount: charity.raisedAmount.toInt(),  // ✅ Convert to int
+                    totalAmount: charity.targetAmount.toInt(),    // ✅ Convert to int
+
+                    category: charity.category,
                   );
                 },
-                child: const UrgentCard(
-                  imagePath: 'assets/images/3d-cartoon-character-b.png',
-                  title: "Medical Aid",
-                  progress: 0.5,
-                  currentAmount: 12000,
-                  totalAmount: 24000,
-                  category: "Medical",
-                ),
               );
             },
           ),
@@ -232,32 +160,34 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Text("Trending", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const Spacer(),
-            GestureDetector(
-              onTap: () {
-                print("More clicked");
-              },
-              child: const Text("More", style: TextStyle(fontSize: 16, color: Colors.grey)),
-            ),
-          ],
-        ),
+        const Text("Trending", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.4,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: 5,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, index) => const TrendingCard(
-              imagePath: 'assets/images/rendering-anime-doctors-work.png',
-              title: "Helping Kenyan Medical Workers",
-              progress: 0.5,
-              currentAmount: 12000,
-              totalAmount: 24000,
-            ),
+          child: StreamBuilder<List<Charity>>(
+            stream: _fetchCharitiesByStatus("Trending"),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text("No trending campaigns found."));
+              }
+
+              return ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: snapshot.data!.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, index) {
+                  Charity charity = snapshot.data![index];
+                  return TrendingCard(
+                    imagePath: charity.imageUrl,
+                    title: charity.name,
+                    progress: charity.raisedAmount / charity.targetAmount,
+                    currentAmount: charity.raisedAmount.toInt(),  // ✅ Convert to int
+                    totalAmount: charity.targetAmount.toInt(),    // ✅ Convert to int
+
+                  );
+                },
+              );
+            },
           ),
         ),
       ],

@@ -62,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Container(color: Colors.black.withOpacity(0.5)),
                     ),
 
-                    /// **🔹 Top Navigation (Back & Settings)**
+                    /// **🔹 Top Navigation (Back & Add Charity Screen)**
                     Positioned(
                       top: screenHeight * 0.02,
                       left: 16,
@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               context,
                               MaterialPageRoute(builder: (context) => AddCharityScreen()),
                             ),
-                            icon: const Icon(Icons.settings, size: 28, color: Colors.white),
+                            icon: const Icon(Icons.add_circle_outline, size: 28, color: Colors.white),
                           ),
                         ],
                       ),

@@ -79,12 +79,18 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
           'startDate': _startDate!.toIso8601String(),
           'endDate': _endDate!.toIso8601String(),
           'image': _imageFile?.path ?? '',
+          'status': 'Normal',
           'updates': [],
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Charity added successfully')),
         );
+
+        // Pop the screen after a short delay
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.pop(context);
+        });
 
         _formKey.currentState!.reset();
         setState(() {
@@ -174,13 +180,13 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
               Center(
                 child: ElevatedButton(
                   onPressed: _addCharity,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                    child: Text('Add Charity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 5,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                    child: Text('Add Charity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
@@ -237,13 +243,23 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
         items: charityCategories.map((category) {
-          return DropdownMenuItem(value: category, child: Text(category));
+          return DropdownMenuItem(
+            value: category,
+            child: Row(
+              children: [
+                Icon(charityCategoryIcons[category], color: Colors.blue), // Display icon
+                SizedBox(width: 10),
+                Text(category),
+              ],
+            ),
+          );
         }).toList(),
         onChanged: (newValue) => setState(() => _selectedCategory = newValue),
         validator: (value) => value == null ? 'Please select a category' : null,
       ),
     );
   }
+
 
   Widget _buildDatePicker(String title, DateTime? date, VoidCallback onTap) {
     return ListTile(

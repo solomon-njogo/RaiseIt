@@ -1,63 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:raiseit/models/categories_model.dart';
 
 class CategoriesCard extends StatelessWidget {
-  final String imagePath;
-  final String title;
-
-  const CategoriesCard({
-    super.key,
-    required this.imagePath,
-    required this.title,
-  });
+  const CategoriesCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Container(
-      width: screenWidth * 0.35, // Increased width
-      constraints: const BoxConstraints(
-        maxWidth: 220, // Increased max width for larger screens
-        minWidth: 120, // Increased min width for smaller screens
-      ),
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 3,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: screenHeight * 0.02,
-            horizontal: screenWidth * 0.04,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  imagePath,
-                  width: screenWidth * 0.25, // Increased image width
-                  height: screenHeight * 0.12, // Increased image height
-                  fit: BoxFit.cover,
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.012),
-              SizedBox(
-                height: 50, // Increased height for better readability
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: screenWidth * 0.04, // Slightly larger font size
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal, // Allows scrolling horizontally
+      child: Row(
+        children: charityCategoryIcons.entries.map((entry) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              children: [
+                Container(
+                  width: screenWidth * 0.15, // Adjust width dynamically
+                  height: screenHeight * 0.08, // Adjust height dynamically
+                  decoration: BoxDecoration(
+                    color: Colors.blue[100], // Background color
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis, // Prevents overflow
+                  child: Icon(
+                    entry.value, // Get the icon from the map
+                    size: screenWidth * 0.08, // Adjust icon size
+                    color: Colors.blue[900],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                SizedBox(height: 8),
+                Text(
+                  entry.key, // Category name
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.035, // Adjust font size
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
