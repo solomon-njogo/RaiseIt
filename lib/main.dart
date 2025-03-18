@@ -12,16 +12,14 @@ void main() async{
     await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
     );
-    
+
   runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => ProfileViewModel()),
-        ],
-        child: const MaterialApp(
-          home: MyApp(),
-        ),
-      ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+      ],
+      child: const MyApp(), // Use MyApp here
+    ),
   );
 }
 
