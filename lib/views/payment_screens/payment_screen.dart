@@ -172,7 +172,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         }
 
                         String charityName = charitySnapshot.get('name'); // Get real charity name
-                        double currentRaisedAmount = charitySnapshot.get('raisedAmount') ?? 0;
+                        double currentRaisedAmount = (charitySnapshot.get('raisedAmount') as num).toDouble();
                         double newRaisedAmount = currentRaisedAmount + donationAmount;
 
                         // Firestore transaction to update raised amount
@@ -194,6 +194,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         );
                       } catch (error) {
                         // Handle Firestore errors properly
+                        print("Failed to process donation: $error)");
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Failed to process donation: $error")),
                         );

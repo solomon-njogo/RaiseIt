@@ -44,8 +44,8 @@ class Charity {
       description: data['description'] ?? '',
       category: data['category'] ?? '',
       location: data['location'] ?? '',
-      targetAmount: (data['targetAmount'] ?? 0).toDouble(),
-      raisedAmount: (data['raisedAmount'] ?? 0).toDouble(),
+      targetAmount: (data['targetAmount'] is num) ? data['targetAmount'].toDouble() : 0.0,
+      raisedAmount: (data['raisedAmount'] is num) ? data['raisedAmount'].toDouble() : 0.0,
       startDate: _parseDateTime(data['startDate']),
       // ✅ Use helper function
       endDate: _parseDateTime(data['endDate']),

@@ -58,7 +58,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
                 // Donation Amount
                 Text(
-                  '\$${widget.donatedAmount.toStringAsFixed(2)}', // Use actual donated amount
+                  '\KSH ${widget.donatedAmount.toStringAsFixed(2)}', // Use actual donated amount
                   style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
@@ -158,7 +158,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                           // Delay navigation until the SnackBar disappears
                           Future.delayed(const Duration(seconds: 0), () {
                             Navigator.pop(context);
-                            Navigator.pop(context);
+                            Navigator.pop(context, true);
                           });
                         },
                         style: ElevatedButton.styleFrom(

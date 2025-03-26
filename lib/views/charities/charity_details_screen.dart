@@ -9,7 +9,13 @@ class CharityDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double progress = charity.raisedAmount / charity.targetAmount;
+    double progress = charity.targetAmount > 0
+        ? (charity.raisedAmount.toDouble() / charity.targetAmount.toDouble()).clamp(0.0, 1.0)
+        : 0.0;
+    int progressPercentage = (progress * 100).toInt();
+
+    // Calculate days left
+    int daysLeft = charity.endDate.difference(DateTime.now()).inDays;
 
     return SafeArea(
       child: Scaffold(
@@ -99,7 +105,7 @@ class CharityDetailsScreen extends StatelessWidget {
                           const Icon(Icons.calendar_today, color: Colors.blue, size: 18),
                           const SizedBox(width: 5),
                           Text(
-                            "${charity.startDate.toLocal().toString().split(' ')[0]} - ${charity.endDate.toLocal().toString().split(' ')[0]}",
+                            "${charity.startDate.toLocal().toString().split(' ')[0]} - ${charity.endDate.toLocal().toString().split(' ')[0]} (${daysLeft > 0 ? "$daysLeft days left" : "Ended"})",
                             style: const TextStyle(fontSize: 16, color: Colors.black54),
                           ),
                         ],
@@ -107,20 +113,40 @@ class CharityDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // Progress Bar
-                      Text(
-                        "Raised: \$${charity.raisedAmount.toStringAsFixed(2)} / \$${charity.targetAmount.toStringAsFixed(2)}",
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          backgroundColor: Colors.grey[300],
-                          color: Colors.green,
-                          minHeight: 12,
-                        ),
+                      // Progress Bar with Centered Percentage
+                      Column(
+                        children: [
+                          // Progress Percentage (Centered)
+                          Center(
+                            child: Text(
+                              "$progressPercentage%",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue, // Blue[900]
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+
+                          // Progress Bar
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: Colors.grey[300],
+                              color: Colors.blue[900], // Blue[900]
+                              minHeight: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Amount Raised
+                          Text(
+                            "Raised: \$${charity.raisedAmount.toStringAsFixed(2)} / \$${charity.targetAmount.toStringAsFixed(2)}",
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                        ],
                       ),
 
                       const SizedBox(height: 20),
@@ -175,17 +201,17 @@ class CharityDetailsScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>  PaymentScreen(charityId: charity.id)),
+                    MaterialPageRoute(builder: (context) => PaymentScreen(charityId: charity.id)),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 18),
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.blue[900],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                   elevation: 5,
-                  shadowColor: Colors.blueAccent,
+                  shadowColor: Colors.blue[900],
                 ),
                 child: const Text(
                   "Donate Now",
