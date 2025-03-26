@@ -42,9 +42,9 @@ This document outlines the **roadmap, tasks, and milestones** for the RaiseIt pr
 ## 🏗 **Development Tasks**
 
 ### 🎨 **UI/UX Improvements**
-- [ ] Improve **responsiveness for tablets & desktops**
-- [ ] Add **animations & smooth transitions**
-- [ ] Create **custom loading indicators**
+- [x] Improve **responsiveness for tablets & desktops**
+- x] Add **animations & smooth transitions**
+- [x] Create **custom loading indicators**
 
 ### 🔧 **Backend Enhancements**
 - [ ] Optimize **database queries for better performance**
