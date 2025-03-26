@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:raiseit/views/donations/my_donations_screen.dart';
 
 class PaymentDetailsScreen extends StatefulWidget {
   final double donatedAmount; // Actual donated amount
@@ -155,10 +156,13 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                             ),
                           );
 
-                          // Delay navigation until the SnackBar disappears
-                          Future.delayed(const Duration(seconds: 0), () {
-                            Navigator.pop(context);
-                            Navigator.pop(context, true);
+                          // Wait until the SnackBar disappears, then navigate
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Ensure no overlap
+                          Future.delayed(const Duration(seconds: 2), () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MyDonationsScreen()),
+                            );
                           });
                         },
                         style: ElevatedButton.styleFrom(

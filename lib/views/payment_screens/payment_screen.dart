@@ -35,10 +35,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
           content: DropdownButton<String>(
             value: selectedCurrency,
             onChanged: (String? newCurrency) {
-              setState(() {
-                selectedCurrency = newCurrency!;
-                Navigator.of(context).pop();  // Close the dialog
-              });
+              if (newCurrency != null) {
+                setState(() {
+                  selectedCurrency = newCurrency;
+                });
+              }
+              Navigator.of(context).pop(); // Close the dialog
             },
             items: currencies.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
@@ -50,6 +52,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
         );
       },
     );
+  }
+
+  // Badge Assignment Function
+  String _getBadge(double amount) {
+    if (amount >= 100000) return "🏆 Legendary Donor";
+    if (amount >= 50000) return "❤️ Life Saver";
+    if (amount >= 20000) return "💎 Platinum Donor";
+    if (amount >= 10000) return "🌟 Hero Donor";
+    if (amount >= 5000) return "🔥 Champion";
+    if (amount >= 1000) return "💖 Kind Soul";
+    if (amount >= 500) return "🌱 Generous Giver";
+    return "🤝 Supporter";
   }
 
   @override
@@ -67,7 +81,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(  // Allow scrolling if content exceeds screen size
+      body: SingleChildScrollView( // Allow scrolling if content exceeds screen size
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -78,10 +92,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
-                textAlign: TextAlign.center,  // Center the input text
+                textAlign: TextAlign.center, // Center the input text
                 style: const TextStyle(fontSize: 22), // Adjust font size
                 decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16), // Adjust height
+                  contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16), // Adjust height
                   prefixText: "$selectedCurrency ", // Use selected currency as prefix
                   hintText: "$selectedCurrency ",
                   border: InputBorder.none, // Remove border
@@ -118,24 +132,22 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                   return TextButton(
                     onPressed: () {
-                      if (buttonLabel == '<-') {
-                        // Remove last character
-                        _amountController.text = _amountController.text.isNotEmpty
-                            ? _amountController.text.substring(0, _amountController.text.length - 1)
-                            : '';
-                      } else if (buttonLabel == '.') {
-                        // Add dot if it's not already there
-                        if (!_amountController.text.contains('.')) {
-                          setState(() {
+                      setState(() {
+                        if (buttonLabel == '<-') {
+                          // Remove last character
+                          if (_amountController.text.isNotEmpty) {
+                            _amountController.text = _amountController.text.substring(0, _amountController.text.length - 1);
+                          }
+                        } else if (buttonLabel == '.') {
+                          // Add dot if it's not already there
+                          if (!_amountController.text.contains('.')) {
                             _amountController.text += buttonLabel;
-                          });
-                        }
-                      } else {
-                        // Append the button value to the current text field (amount)
-                        setState(() {
+                          }
+                        } else {
+                          // Append the button value to the current text field (amount)
                           _amountController.text += buttonLabel;
-                        });
-                      }
+                        }
+                      });
                     },
                     child: iconData == null
                         ? Text(
@@ -152,54 +164,58 @@ class _PaymentScreenState extends State<PaymentScreen> {
               // Payment Button with dynamic amount
               Center(
                 child: ElevatedButton(
-                    onPressed: () async {
-                      double? donationAmount = double.tryParse(_amountController.text);
-                      if (donationAmount == null || donationAmount <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Enter a valid donation amount")),
-                        );
-                        return;
-                      }
+                  onPressed: () async {
+                    double? donationAmount = double.tryParse(_amountController.text);
+                    if (donationAmount == null || donationAmount <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Enter a valid donation amount")),
+                      );
+                      return;
+                    }
 
-                      // Reference to the specific charity document
-                      DocumentReference charityRef = FirebaseFirestore.instance.collection('charities').doc(widget.charityId);
+                    DocumentReference charityRef = FirebaseFirestore.instance.collection('charities').doc(widget.charityId);
 
-                      try {
-                        // Fetch charity data first
-                        DocumentSnapshot charitySnapshot = await charityRef.get();
-                        if (!charitySnapshot.exists) {
-                          throw Exception("Charity does not exist!");
-                        }
+                    try {
+                      DocumentSnapshot charitySnapshot = await charityRef.get();
+                      if (!charitySnapshot.exists) throw Exception("Charity does not exist!");
 
-                        String charityName = charitySnapshot.get('name'); // Get real charity name
-                        double currentRaisedAmount = (charitySnapshot.get('raisedAmount') as num).toDouble();
-                        double newRaisedAmount = currentRaisedAmount + donationAmount;
+                      String charityName = charitySnapshot.get('name');
+                      double currentRaisedAmount = (charitySnapshot.get('raisedAmount') ?? 0).toDouble();
+                      double newRaisedAmount = currentRaisedAmount + donationAmount;
 
-                        // Firestore transaction to update raised amount
-                        await FirebaseFirestore.instance.runTransaction((transaction) async {
-                          transaction.update(charityRef, {'raisedAmount': newRaisedAmount});
+                      // Firestore Transaction: Update charity and save donation
+                      await FirebaseFirestore.instance.runTransaction((transaction) async {
+                        transaction.update(charityRef, {'raisedAmount': newRaisedAmount});
+
+                        // Add donation record to "donations" collection within the transaction
+                        transaction.set(FirebaseFirestore.instance.collection('donations').doc(), {
+                          'charityId': widget.charityId,
+                          'charityName': charityName,
+                          'amount': donationAmount,
+                          'currency': selectedCurrency,
+                          'date': Timestamp.now(),
+                          'badge': _getBadge(donationAmount), // Assign a badge
                         });
+                      });
 
-                        // Navigate to the PaymentDetailsScreen with real data
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PaymentDetailsScreen(
-                              donatedAmount: donationAmount, // Actual amount inputted
-                              organization: charityName, // Real charity name from Firestore
-                              transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}', // Generate unique transaction ID
-                              transactionDate: DateTime.now(), // Timestamp of transaction
-                            ),
+                      // Navigate to the payment screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentDetailsScreen(
+                            donatedAmount: donationAmount,
+                            organization: charityName,
+                            transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}',
+                            transactionDate: DateTime.now(),
                           ),
-                        );
-                      } catch (error) {
-                        // Handle Firestore errors properly
-                        print("Failed to process donation: $error)");
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Failed to process donation: $error")),
-                        );
-                      }
-                    },
+                        ),
+                      );
+                    } catch (error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Failed to process donation: $error")),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[900],
                     shape: RoundedRectangleBorder(
