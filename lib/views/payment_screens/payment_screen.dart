@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:raiseit/views/payment_screens/payment_details_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
-  final String charityId; // Pass the charity ID dynamically
+  final String charityId;
 
   const PaymentScreen({super.key, required this.charityId});
 
@@ -13,48 +13,15 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   final TextEditingController _amountController = TextEditingController();
-  String selectedCurrency = 'KSH'; // Default currency
-
-  final List<String> currencies = ['KSH', 'USD', 'EUR', 'GBP', 'NGN']; // Add more currencies as needed
+  String selectedCurrency = 'KSH';
+  final List<String> currencies = ['KSH', 'USD', 'EUR', 'GBP', 'NGN'];
 
   @override
   void initState() {
     super.initState();
-    _amountController.addListener(() {
-      setState(() {}); // Call setState to rebuild the widget with the new value
-    });
+    _amountController.addListener(() => setState(() {}));
   }
 
-  // Function to show currency selection dialog
-  void _showCurrencyDialog() {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Currency'),
-          content: DropdownButton<String>(
-            value: selectedCurrency,
-            onChanged: (String? newCurrency) {
-              if (newCurrency != null) {
-                setState(() {
-                  selectedCurrency = newCurrency;
-                });
-              }
-              Navigator.of(context).pop(); // Close the dialog
-            },
-            items: currencies.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
-
-  // Badge Assignment Function
   String _getBadge(double amount) {
     if (amount >= 100000) return "🏆 Legendary Donor";
     if (amount >= 50000) return "❤️ Life Saver";
@@ -66,170 +33,118 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return "🤝 Supporter";
   }
 
+  void _showCurrencyDialog() {
+    showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Currency'),
+          content: DropdownButton<String>(
+            value: selectedCurrency,
+            onChanged: (newCurrency) {
+              if (newCurrency != null) {
+                setState(() => selectedCurrency = newCurrency);
+              }
+              Navigator.pop(context);
+            },
+            items: currencies.map((value) => DropdownMenuItem(value: value, child: Text(value))).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _processDonation() async {
+    double? donationAmount = double.tryParse(_amountController.text);
+    if (donationAmount == null || donationAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter a valid donation amount")));
+      return;
+    }
+
+    DocumentReference charityRef = FirebaseFirestore.instance.collection('charities').doc(widget.charityId);
+    try {
+      DocumentSnapshot charitySnapshot = await charityRef.get();
+      if (!charitySnapshot.exists) throw Exception("Charity does not exist!");
+
+      String charityName = charitySnapshot.get('name');
+      double newRaisedAmount = (charitySnapshot.get('raisedAmount') ?? 0).toDouble() + donationAmount;
+      String donorBadge = _getBadge(donationAmount);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.update(charityRef, {'raisedAmount': newRaisedAmount});
+        transaction.set(FirebaseFirestore.instance.collection('donations').doc(), {
+          'charityId': widget.charityId,
+          'charityName': charityName,
+          'amount': donationAmount,
+          'currency': selectedCurrency,
+          'date': Timestamp.now(),
+          'badge': donorBadge,
+        });
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentDetailsScreen(
+            donatedAmount: donationAmount,
+            organization: charityName,
+            transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}',
+            transactionDate: DateTime.now(),
+            donorBadge: donorBadge,
+          ),
+        ),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to process donation: $error")));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isWideScreen = screenWidth > 600;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Donation'),
         backgroundColor: Colors.transparent,
-        elevation: 0, // Remove app bar shadow
+        elevation: 0,
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.currency_exchange),
-            onPressed: _showCurrencyDialog, // Show currency selection dialog on button press
-          ),
+          IconButton(icon: const Icon(Icons.currency_exchange), onPressed: _showCurrencyDialog),
         ],
       ),
-      body: SingleChildScrollView( // Allow scrolling if content exceeds screen size
-        child: Padding(
+      body: Center(
+        child: Container(
+          width: isWideScreen ? 500 : screenWidth * 0.9,
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Amount Input Field with the selected currency as the prefix
               TextField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                textAlign: TextAlign.center, // Center the input text
-                style: const TextStyle(fontSize: 22), // Adjust font size
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 22),
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16), // Adjust height
-                  prefixText: "$selectedCurrency ", // Use selected currency as prefix
-                  hintText: "$selectedCurrency ",
-                  border: InputBorder.none, // Remove border
+                  contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  prefixText: "$selectedCurrency ",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-
-              const SizedBox(height: 10),
-
-              // Number Pad (Numeric Input Only) - Layout 123, 456, 789, .0<-
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
-                ),
-                itemCount: 12, // Number pad 0-9 + .0<- + Clear button
-                itemBuilder: (context, index) {
-                  String buttonLabel = '';
-                  IconData? iconData;
-
-                  // Arrange buttons in the desired order: 123 456 789 .0<-
-                  if (index < 9) {
-                    buttonLabel = (index + 1).toString();
-                  } else if (index == 9) {
-                    buttonLabel = '.';
-                  } else if (index == 10) {
-                    buttonLabel = '0';
-                  } else if (index == 11) {
-                    buttonLabel = '<-';
-                    iconData = Icons.backspace_outlined;
-                  }
-
-                  return TextButton(
-                    onPressed: () {
-                      setState(() {
-                        if (buttonLabel == '<-') {
-                          // Remove last character
-                          if (_amountController.text.isNotEmpty) {
-                            _amountController.text = _amountController.text.substring(0, _amountController.text.length - 1);
-                          }
-                        } else if (buttonLabel == '.') {
-                          // Add dot if it's not already there
-                          if (!_amountController.text.contains('.')) {
-                            _amountController.text += buttonLabel;
-                          }
-                        } else {
-                          // Append the button value to the current text field (amount)
-                          _amountController.text += buttonLabel;
-                        }
-                      });
-                    },
-                    child: iconData == null
-                        ? Text(
-                      buttonLabel,
-                      style: TextStyle(fontSize: 24, color: Colors.blue[900]),
-                    )
-                        : Icon(iconData, size: 24, color: Colors.blue[900]),
-                  );
-                },
-              ),
-
               const SizedBox(height: 20),
-
-              // Payment Button with dynamic amount
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    double? donationAmount = double.tryParse(_amountController.text);
-                    if (donationAmount == null || donationAmount <= 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Enter a valid donation amount")),
-                      );
-                      return;
-                    }
-
-                    DocumentReference charityRef = FirebaseFirestore.instance.collection('charities').doc(widget.charityId);
-
-                    try {
-                      DocumentSnapshot charitySnapshot = await charityRef.get();
-                      if (!charitySnapshot.exists) throw Exception("Charity does not exist!");
-
-                      String charityName = charitySnapshot.get('name');
-                      double currentRaisedAmount = (charitySnapshot.get('raisedAmount') ?? 0).toDouble();
-                      double newRaisedAmount = currentRaisedAmount + donationAmount;
-
-                      // Firestore Transaction: Update charity and save donation
-                      await FirebaseFirestore.instance.runTransaction((transaction) async {
-                        transaction.update(charityRef, {'raisedAmount': newRaisedAmount});
-
-                        // Add donation record to "donations" collection within the transaction
-                        transaction.set(FirebaseFirestore.instance.collection('donations').doc(), {
-                          'charityId': widget.charityId,
-                          'charityName': charityName,
-                          'amount': donationAmount,
-                          'currency': selectedCurrency,
-                          'date': Timestamp.now(),
-                          'badge': _getBadge(donationAmount), // Assign a badge
-                        });
-                      });
-
-                      // Navigate to the payment screen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentDetailsScreen(
-                            donatedAmount: donationAmount,
-                            organization: charityName,
-                            transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}',
-                            transactionDate: DateTime.now(),
-                          ),
-                        ),
-                      );
-                    } catch (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Failed to process donation: $error")),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[900],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12), // Adjust padding
-                  ),
-                  child: Text(
-                    'Donate $selectedCurrency ${_amountController.text}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+              ElevatedButton(
+                onPressed: _processDonation,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[900],
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                ),
+                child: Text(
+                  'Donate $selectedCurrency ${_amountController.text}',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
-              const SizedBox(height: 30),
             ],
           ),
         ),

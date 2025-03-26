@@ -1,57 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:raiseit/views/donations/my_donations_screen.dart';
 
 class PaymentDetailsScreen extends StatefulWidget {
-  final double donatedAmount; // Actual donated amount
-  final String organization; // Real charity name
-  final String transactionId;
+  final double donatedAmount;
+  final String organization;
   final DateTime transactionDate;
+  final String transactionId;
 
   const PaymentDetailsScreen({
-    super.key,
+    Key? key,
     required this.donatedAmount,
     required this.organization,
-    required this.transactionId,
     required this.transactionDate,
-  });
+    required this.transactionId,
+    required String donorBadge,
+  }) : super(key: key);
 
   @override
   _PaymentDetailsScreenState createState() => _PaymentDetailsScreenState();
 }
 
 class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
-  // Function to copy the transaction ID to clipboard
   void _copyToClipboard() {
     Clipboard.setData(ClipboardData(text: widget.transactionId));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Transaction ID copied to clipboard")),
+      const SnackBar(
+        content: Text("Transaction ID copied to clipboard"),
+        backgroundColor: Colors.blue,
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Donation'),
-        backgroundColor: Colors.blue[900], // Set to blue[900]
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () {}, // Implement share feature on button press
-          ),
-        ],
+        title: const Text('Payment Details'),
+        backgroundColor: Colors.blue[900],
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Center(
+          child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 20),
+
                 // Image
                 Image.asset('assets/images/3d-hand-using-online-banking-app-smartphone.png'),
 
@@ -59,7 +59,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 
                 // Donation Amount
                 Text(
-                  '\KSH ${widget.donatedAmount.toStringAsFixed(2)}', // Use actual donated amount
+                  'KSH ${widget.donatedAmount.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
@@ -78,18 +78,24 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   children: [
                     const Text('to ', style: TextStyle(fontSize: 18)),
                     Text(
-                      widget.organization, // Use actual charity name
+                      widget.organization,
                       style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.blue[900]),
                     ),
                   ],
                 ),
 
+                const SizedBox(height: 5),
+
+                // Transaction Details
                 Text(
                   'Transaction Date: ${DateFormat.yMMMd().format(widget.transactionDate)} · ${DateFormat.jm().format(widget.transactionDate)}',
                   style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
 
+                const SizedBox(height: 5),
+
+                // Transaction ID with Copy Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -124,15 +130,16 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   ),
                 ),
 
-                const Spacer(),
+                const SizedBox(height: 20),
 
+                // Buttons: Donate Again & Done
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context); // Go back to donation screen
+                          Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
@@ -157,7 +164,6 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                           );
 
                           // Wait until the SnackBar disappears, then navigate
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Ensure no overlap
                           Future.delayed(const Duration(seconds: 2), () {
                             Navigator.pushReplacement(
                               context,

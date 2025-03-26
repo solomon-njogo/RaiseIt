@@ -13,12 +13,12 @@ import 'package:raiseit/views/profile_screens/profile_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-
-
   @override
   Widget build(BuildContext context) {
     final homeViewModel = Provider.of<HomeViewModel>(context);
     final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
 
     return SafeArea(
       child: Scaffold(
@@ -33,17 +33,17 @@ class HomeScreen extends StatelessWidget {
               children: [
                 SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 32.0 : isTablet ? 24.0 : 16.0,
-                    vertical: isDesktop ? 24.0 : 16.0,
+                    horizontal: screenWidth * 0.05,
+                    vertical: screenHeight * 0.02,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const HomeHeader(),
-                      SizedBox(height: mediaQuery.size.height * 0.02),
+                      SizedBox(height: screenHeight * 0.02),
                       CategoriesCard(),
-                      SizedBox(height: mediaQuery.size.height * 0.02),
-                      _buildFilterAndCharities(context),
+                      SizedBox(height: screenHeight * 0.02),
+                      _buildFilterAndCharities(context, screenHeight),
                     ],
                   ),
                 ),
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterAndCharities(BuildContext context) {
+  Widget _buildFilterAndCharities(BuildContext context, double screenHeight) {
     final homeViewModel = Provider.of<HomeViewModel>(context);
 
     return Column(
@@ -91,7 +91,7 @@ class HomeScreen extends StatelessWidget {
             }
 
             return SizedBox(
-              height: MediaQuery.of(context).size.height * 0.6,
+              height: screenHeight * 0.6,
               child: ListView.separated(
                 itemCount: snapshot.data!.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -107,9 +107,9 @@ class HomeScreen extends StatelessWidget {
                     child: Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       elevation: 4,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      margin: EdgeInsets.symmetric(horizontal: screenHeight * 0.02),
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(screenHeight * 0.015),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -118,13 +118,13 @@ class HomeScreen extends StatelessWidget {
                               child: charity.imageUrl.isNotEmpty
                                   ? Image.network(
                                 charity.imageUrl,
-                                height: 180,
+                                height: screenHeight * 0.25,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               )
                                   : Image.asset(
                                 'assets/images/rendering-anime-doctors-work.png',
-                                height: 180,
+                                height: screenHeight * 0.25,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),

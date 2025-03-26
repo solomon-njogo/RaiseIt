@@ -8,54 +8,64 @@ class CategoriesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final isTablet = screenWidth > 600 && screenWidth <= 900;
+    final isDesktop = screenWidth > 900;
 
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal, // Allows scrolling horizontally
-      child: Column(
-        children: [
-          Text(
-            "Categories",
-            style: TextStyle(
-              fontSize: 18, // Adjust size as needed
-              fontWeight: FontWeight.bold, // Make it bold
-              color: Colors.black, // Black color
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: isDesktop ? 32.0 : isTablet ? 24.0 : 16.0,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Categories",
+              style: TextStyle(
+                fontSize: isDesktop ? 22 : isTablet ? 20 : 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
-            textAlign: TextAlign.start, // Align text to the start (left)
-          ),
-          Row(
-            children: charityCategoryIcons.entries.map((entry) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  children: [
-                    Container(
-                      width: screenWidth * 0.15, // Adjust width dynamically
-                      height: screenHeight * 0.08, // Adjust height dynamically
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100], // Background color
-                        borderRadius: BorderRadius.circular(15),
+            const SizedBox(height: 8),
+            Row(
+              children: charityCategoryIcons.entries.map((entry) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 12.0 : isTablet ? 10.0 : 8.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: isDesktop ? 90 : isTablet ? 75 : screenWidth * 0.15,
+                        height: isDesktop ? 90 : isTablet ? 75 : screenHeight * 0.08,
+                        decoration: BoxDecoration(
+                          color: Colors.blue[100],
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Icon(
+                          entry.value,
+                          size: isDesktop ? 42 : isTablet ? 36 : screenWidth * 0.08,
+                          color: Colors.blue[900],
+                        ),
                       ),
-                      child: Icon(
-                        entry.value, // Get the icon from the map
-                        size: screenWidth * 0.08, // Adjust icon size
-                        color: Colors.blue[900],
+                      const SizedBox(height: 8),
+                      Text(
+                        entry.key,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: isDesktop ? 18 : isTablet ? 16 : screenWidth * 0.035,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      entry.key, // Category name
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.035, // Adjust font size
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-        ],
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
