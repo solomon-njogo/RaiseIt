@@ -10,16 +10,16 @@ This document outlines the **roadmap, tasks, and milestones** for the RaiseIt pr
 - [x] Set up **project repository** and folder structure
 - [x] Implement **Firebase authentication** (Google, Email, Phone)
 - [x] Set up **user profiles & role management**
-- [ ] Implement **campaign creation and management**
-- [ ] Develop **donation tracking system**
+- [x] Implement **campaign creation and management**
+- [x] Develop **donation tracking system**
 - [ ] Integrate **M-Pesa, PayPal, and crypto payments**
-- [ ] Implement **real-time Firestore updates for donations**
+- [x] Implement **real-time Firestore updates for donations**
 
 ### 📱 **Phase 2: Mobile & Web UI/UX**
 - [x] Design and implement **Home Screen UI**
 - [x] Create **campaign details screen**
 - [x] Implement **profile management screen**
-- [ ] Add **categories & filtering options**
+- [x] Add **categories & filtering options**
 - [ ] Implement **search functionality** for campaigns
 - [ ] Add **dark mode & theme customization**
 
@@ -35,8 +35,8 @@ This document outlines the **roadmap, tasks, and milestones** for the RaiseIt pr
 - [ ] Implement **fraud detection & anti-scam measures**
 
 ### 🚀 **Phase 6: Testing & Deployment**
-- [ ] Conduct **comprehensive unit & integration testing**
-- [ ] Optimize **performance & reduce load times**
+- [x] Conduct **comprehensive unit & integration testing**
+- [x] Optimize **performance & reduce load times**
 ---
 
 ## 🏗 **Development Tasks**
