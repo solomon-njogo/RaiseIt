@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For formatting the date and time
-import 'package:flutter/services.dart'; // For clipboard functionality
+import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class PaymentDetailsScreen extends StatefulWidget {
-  const PaymentDetailsScreen({super.key});
+  final double donatedAmount; // Actual donated amount
+  final String organization; // Real charity name
+  final String transactionId;
+  final DateTime transactionDate;
+
+  const PaymentDetailsScreen({
+    super.key,
+    required this.donatedAmount,
+    required this.organization,
+    required this.transactionId,
+    required this.transactionDate,
+  });
 
   @override
   _PaymentDetailsScreenState createState() => _PaymentDetailsScreenState();
 }
 
 class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
-  // Dummy transaction details
-  final double donatedAmount = 100.50; // Example amount
-  final String organization = 'Save the Earth Foundation'; // Example organization
-  final String transactionId = 'TXN123456789'; // Example transaction ID
-  final DateTime transactionDate = DateTime.now(); // Current date and time
-
   // Function to copy the transaction ID to clipboard
   void _copyToClipboard() {
-    Clipboard.setData(ClipboardData(text: transactionId));
+    Clipboard.setData(ClipboardData(text: widget.transactionId));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Transaction ID copied to clipboard")),
+    );
   }
 
   @override
@@ -26,8 +34,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Donation'),
-        backgroundColor: Colors.transparent,
-        elevation: 0, // Remove app bar shadow
+        backgroundColor: Colors.blue[900], // Set to blue[900]
         centerTitle: true,
         actions: [
           IconButton(
@@ -38,67 +45,66 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0), // Add padding to sides
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center, // Centering everything horizontally
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Correctly displaying an image
+                // Image
                 Image.asset('assets/images/3d-hand-using-online-banking-app-smartphone.png'),
 
                 const SizedBox(height: 5),
 
-                // Donation details
+                // Donation Amount
                 Text(
-                  '\$${donatedAmount.toStringAsFixed(2)}', // Added dollar sign in front of amount
-                  style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold), // Increased font size
-                  textAlign: TextAlign.center, // Center the text
+                  '\$${widget.donatedAmount.toStringAsFixed(2)}', // Use actual donated amount
+                  style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 10,),
-                Text(
-                  'Donation Successful', // Format amount to 2 decimal places
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center, // Center the text
+
+                const SizedBox(height: 10),
+
+                // Success Message
+                const Text(
+                  'Donation Successful',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
+
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // Center the row contents
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const Text('to ', style: TextStyle(fontSize: 18)),
                     Text(
-                      'to ',
-                      style: const TextStyle(fontSize: 18), // Slightly bold organization name
-                    ),
-                    Text(
-                      organization,
-                      style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.green), // Slightly bold organization name
+                      widget.organization, // Use actual charity name
+                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.blue[900]),
                     ),
                   ],
                 ),
+
                 Text(
-                  'Transaction Date: ${DateFormat.yMMMd().format(transactionDate)} · ${DateFormat.jm().format(transactionDate)}', // Added interpunct between date and time
+                  'Transaction Date: ${DateFormat.yMMMd().format(widget.transactionDate)} · ${DateFormat.jm().format(widget.transactionDate)}',
                   style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center, // Center the text
+                  textAlign: TextAlign.center,
                 ),
+
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // Center the row contents
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'ID: $transactionId',
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                    Text('ID: ${widget.transactionId}', style: const TextStyle(fontSize: 16)),
                     IconButton(
-                      icon: const Icon(Icons.copy, color: Colors.grey), // Changed to grey
-                      onPressed: _copyToClipboard, // Copy the transaction ID to clipboard
+                      icon: const Icon(Icons.copy, color: Colors.grey),
+                      onPressed: _copyToClipboard,
                     ),
                   ],
                 ),
 
                 const SizedBox(height: 20),
 
-                // View Details Button (underlined)
+                // View Details Button (Underlined)
                 TextButton(
                   onPressed: () {
-                    // Navigate to view details screen or show more information
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("View more details..."),
@@ -107,13 +113,12 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                       ),
                     );
                   },
-                  child: Text(
+                  child: const Text(
                     'View Details',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.normal, // Normal weight for the text
                       color: Colors.blue,
-                      decoration: TextDecoration.underline, // Underlined text
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
@@ -121,19 +126,12 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                 const Spacer(),
 
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // Center the buttons
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          // Example action on donation
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Go back to donation page"),
-                              backgroundColor: Colors.green,
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
+                          Navigator.pop(context); // Go back to donation screen
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
@@ -141,36 +139,42 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                         ),
                         child: Text(
                           'Donate again',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue[900]),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10), // Space between buttons
+                    const SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          // Example action on donation
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("Thank you for your donation"),
-                              backgroundColor: Colors.green,
+                              backgroundColor: Colors.blue,
                               duration: Duration(seconds: 2),
                             ),
                           );
+
+                          // Delay navigation until the SnackBar disappears
+                          Future.delayed(const Duration(seconds: 0), () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Colors.blue[900],
                           padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Done',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 30,)
+
+                const SizedBox(height: 30),
               ],
             ),
           ),

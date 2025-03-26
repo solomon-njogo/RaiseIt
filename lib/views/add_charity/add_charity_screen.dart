@@ -79,7 +79,7 @@ class _AddCharityScreenState extends State<AddCharityScreen> {
           'startDate': _startDate!.toIso8601String(),
           'endDate': _endDate!.toIso8601String(),
           'image': _imageFile?.path ?? '',
-          'status': 'Normal',
+          'status': 'All',
           'updates': [],
         });
 

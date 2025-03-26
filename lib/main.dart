@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:raiseit/viewmodels/home_viewmodel.dart';
 import 'package:raiseit/viewmodels/profile_viewmodel.dart';
 import 'package:raiseit/views/auth_screens/authwrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,6 +17,7 @@ void main() async{
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => HomeViewModel()),
         ChangeNotifierProvider(create: (_) => ProfileViewModel()),
       ],
       child: const MyApp(), // Use MyApp here

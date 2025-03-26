@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:raiseit/views/payment_screens/payment_details_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key});
+  final String charityId; // Pass the charity ID dynamically
+
+  const PaymentScreen({super.key, required this.charityId});
 
   @override
   _PaymentScreenState createState() => _PaymentScreenState();
@@ -137,9 +140,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     child: iconData == null
                         ? Text(
                       buttonLabel,
-                      style: const TextStyle(fontSize: 24, color: Colors.green), // Green font color
+                      style: TextStyle(fontSize: 24, color: Colors.blue[900]),
                     )
-                        : Icon(iconData, size: 24, color: Colors.green), // Green icon color
+                        : Icon(iconData, size: 24, color: Colors.blue[900]),
                   );
                 },
               ),
@@ -149,17 +152,55 @@ class _PaymentScreenState extends State<PaymentScreen> {
               // Payment Button with dynamic amount
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Here you would handle the payment logic
+                    onPressed: () async {
+                      double? donationAmount = double.tryParse(_amountController.text);
+                      if (donationAmount == null || donationAmount <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Enter a valid donation amount")),
+                        );
+                        return;
+                      }
 
-                    // If payment is successful, show payment details page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const PaymentDetailsScreen()),
-                    );
-                  },
+                      // Reference to the specific charity document
+                      DocumentReference charityRef = FirebaseFirestore.instance.collection('charities').doc(widget.charityId);
+
+                      try {
+                        // Fetch charity data first
+                        DocumentSnapshot charitySnapshot = await charityRef.get();
+                        if (!charitySnapshot.exists) {
+                          throw Exception("Charity does not exist!");
+                        }
+
+                        String charityName = charitySnapshot.get('name'); // Get real charity name
+                        double currentRaisedAmount = charitySnapshot.get('raisedAmount') ?? 0;
+                        double newRaisedAmount = currentRaisedAmount + donationAmount;
+
+                        // Firestore transaction to update raised amount
+                        await FirebaseFirestore.instance.runTransaction((transaction) async {
+                          transaction.update(charityRef, {'raisedAmount': newRaisedAmount});
+                        });
+
+                        // Navigate to the PaymentDetailsScreen with real data
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PaymentDetailsScreen(
+                              donatedAmount: donationAmount, // Actual amount inputted
+                              organization: charityName, // Real charity name from Firestore
+                              transactionId: 'TXN${DateTime.now().millisecondsSinceEpoch}', // Generate unique transaction ID
+                              transactionDate: DateTime.now(), // Timestamp of transaction
+                            ),
+                          ),
+                        );
+                      } catch (error) {
+                        // Handle Firestore errors properly
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Failed to process donation: $error")),
+                        );
+                      }
+                    },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: Colors.blue[900],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),

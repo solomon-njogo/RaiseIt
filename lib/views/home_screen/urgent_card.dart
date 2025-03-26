@@ -1,41 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:raiseit/models/charity_model.dart';
 import 'package:raiseit/views/charities/charity_details_screen.dart'; // Import the CharityDetailsScreen
 
 class UrgentCard extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final double progress;
-  final int currentAmount;
-  final int totalAmount;
-  final String category;
+  final Charity charity; // ✅ Add charity property
 
-  const UrgentCard({
-    super.key,
-    required this.imagePath,
-    required this.title,
-    required this.progress,
-    required this.currentAmount,
-    required this.totalAmount,
-    required this.category,
-  });
+  // ✅ Constructor to receive charity data
+  const UrgentCard({Key? key, required this.charity}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate to CharityDetailsScreen
+        // Navigate to CharityDetailsScreen with charity data
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CharityDetailsScreen(
-              title: title,
-              imagePath: imagePath,
-              progress: progress,
-              currentAmount: currentAmount,
-              totalAmount: totalAmount,
-              category: category,
-              description: 'More details about this urgent charity.',
-            ),
+            builder: (context) => CharityDetailsScreen(charity: charity),
           ),
         );
       },
@@ -53,8 +34,8 @@ class UrgentCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(15),
-                    child: Image.asset(
-                      imagePath,
+                    child: Image.network( // ✅ Use network image for Firestore data
+                      charity.imageUrl,
                       width: double.infinity,
                       height: MediaQuery.of(context).size.height * 0.175,
                       fit: BoxFit.cover,
@@ -70,7 +51,7 @@ class UrgentCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        category,
+                        charity.category,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -83,7 +64,7 @@ class UrgentCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                title,
+                charity.name, // ✅ Use charity name
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 textAlign: TextAlign.left,
               ),
@@ -91,7 +72,7 @@ class UrgentCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: LinearProgressIndicator(
-                  value: progress,
+                  value: charity.raisedAmount / charity.targetAmount, // ✅ Calculate progress dynamically
                   color: Colors.blue,
                   backgroundColor: Colors.grey[300],
                   minHeight: 8,
@@ -100,14 +81,14 @@ class UrgentCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Text("\$$currentAmount",
+                  Text("\$${charity.raisedAmount.toStringAsFixed(2)}",
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.blue)),
                   const Text(" of ", style: TextStyle(fontSize: 15, color: Colors.grey)),
-                  Text("\$$totalAmount",
+                  Text("\$${charity.targetAmount.toStringAsFixed(2)}",
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                   const Text(" funded", style: TextStyle(fontSize: 15, color: Colors.grey)),
                   const Spacer(),
-                  Text("${(progress * 100).toInt()}%",
+                  Text("${((charity.raisedAmount / charity.targetAmount) * 100).toInt()}%",
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.grey)),
                 ],
               ),
